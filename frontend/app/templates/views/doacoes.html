@@ -1,0 +1,33 @@
+<div class="card">
+  <h2>Doações</h2>
+  <form ng-submit="vm.adicionar()">
+    <div class="grid grid-3">
+      <div>
+        <label class="label">Material</label>
+        <input class="input" ng-model="vm.form.material" placeholder="Ex.: Garrafas PET" required />
+      </div>
+      <div>
+        <label class="label">Quantidade</label>
+        <input class="input" type="number" min="1" ng-model="vm.form.qtd" required />
+      </div>
+      <div>
+        <label class="label">Contato</label>
+        <input class="input" ng-model="vm.form.contato" placeholder="(xx) xxxxx-xxxx" required />
+      </div>
+    </div>
+    <div style="margin-top:12px"><button class="btn" type="submit">Cadastrar</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Minhas doações</h3>
+  <ul class="list">
+    <li ng-repeat="d in vm.items">
+      <strong>{{ d.material }}</strong> — {{ d.qtd }} un — Contato: {{ d.contato }}
+      <div style="margin-top:6px">
+        <button class="btn secondary" ng-click="vm.marcarEntregue(d)">Marcar entregue</button>
+        <button class="btn" ng-click="vm.remover(d)">Remover</button>
+      </div>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,30 @@
+<div class="header-content">
+  <a href="#!/" class="logo">
+    <div class="logo-icon">♻</div>
+    Recicla Fácil
+  </a>
+  
+  <nav class="nav">
+    <a href="#!/pontos" ng-class="{'active': $location.path() === '/pontos'}">
+      <span class="nav-icon">📍</span>
+      Pontos de Coleta
+    </a>
+    <a href="#!/cronograma" ng-class="{'active': $location.path() === '/cronograma'}">
+      <span class="nav-icon">📅</span>
+      Cronograma
+    </a>
+    <a href="#!/pontuacao" ng-class="{'active': $location.path() === '/pontuacao'}">
+      <span class="nav-icon">🏆</span>
+      Minha Pontuação
+    </a>
+    <a href="#!/recompensas" ng-class="{'active': $location.path() === '/recompensas'}">
+      <span class="nav-icon">🎁</span>
+      Recompensas
+    </a>
+  </nav>
+  
+  <div class="header-actions">
+    <a href="#!/login" class="btn btn-secondary">Entrar</a>
+    <a href="#!/cadastro" class="btn btn-primary">Cadastrar</a>
+  </div>
+</div>

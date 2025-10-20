@@ -1,0 +1,82 @@
+services:
+  # Frontend - Nginx servindo AngularJS + proxy para backend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: recicla-facil-frontend
+    container_name: recicla_facil_frontend
+    ports:
+      - "9160:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - recicla_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Backend - Laravel API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: recicla-facil-backend
+    container_name: recicla_facil_backend
+    expose:
+      - "80"
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=recicla_facil
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/var/www/html
+    networks:
+      - recicla_net
+    healthcheck:
+      test: ["CMD", "php", "-r", "echo 'OK';"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Database - MySQL
+  db:
+    image: mysql:8.0
+    container_name: recicla_facil_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=recicla_facil
+      - MYSQL_USER=recicla_user
+      - MYSQL_PASSWORD=recicla_pass
+    ports:
+      - "33061:3306"
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    volumes:
+      - recicla_mysql_data:/var/lib/mysql
+    networks:
+      - recicla_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  recicla_mysql_data:
+
+networks:
+  recicla_net:
+    driver: bridge

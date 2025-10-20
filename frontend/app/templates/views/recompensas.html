@@ -1,0 +1,40 @@
+<div class="page-header">
+  <div class="points-display-card">
+    <div class="points-info">
+      <span class="recycle-icon">♻️</span>
+      <span class="points-text">Você tem 8.350 pontos</span>
+    </div>
+  </div>
+  
+  <h1 class="page-title">Recompensas Disponíveis</h1>
+  <p class="page-subtitle">
+    Troque seus pontos por recompensas incríveis! Quanto mais você recicla, mais benefícios você conquista.
+  </p>
+</div>
+
+<div class="rewards-grid">
+  <div class="reward-card" ng-repeat="recompensa in vm.recompensas">
+    <div class="reward-availability">Disponível</div>
+    
+    <div class="reward-icon">
+      <div class="icon-container">{{ recompensa.icone }}</div>
+    </div>
+    
+    <div class="reward-content">
+      <h3 class="reward-title">{{ recompensa.titulo }}</h3>
+      <div class="reward-category">
+        <span class="category-icon">{{ recompensa.categoriaIcone }}</span>
+        <span class="category-text">{{ recompensa.categoria }}</span>
+      </div>
+      
+      <div class="reward-details">
+        <div class="reward-points">{{ recompensa.pontos }} pts</div>
+        <div class="reward-stock">{{ recompensa.disponivel }} disponíveis</div>
+      </div>
+    </div>
+    
+    <div class="reward-actions">
+      <button class="btn btn-primary">Resgatar</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+# Configurações de cache para desenvolvimento
+<IfModule mod_headers.c>
+    # Desabilitar cache para arquivos HTML
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+    
+    # Cache curto para CSS e JS (5 minutos)
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=300, must-revalidate"
+    </FilesMatch>
+    
+    # Cache para imagens (1 hora)
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg)$">
+        Header set Cache-Control "max-age=3600"
+    </FilesMatch>
+</IfModule>
+
+# Forçar recarregamento de arquivos estáticos
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.html [QSA,L]
+</IfModule>

@@ -1,0 +1,43 @@
+<div class="page-header">
+  <h1 class="page-title">Cronograma de Coleta</h1>
+  <p class="page-subtitle">
+    Fique por dentro dos dias e horários de coleta seletiva no seu bairro. Ative notificações para não perder nenhuma coleta!
+  </p>
+</div>
+
+<div class="schedule-list">
+  <div class="schedule-card" ng-repeat="coleta in vm.coletas">
+    <div class="schedule-date">
+      <div class="date-square">
+        <div class="date-number">{{ coleta.dia }}</div>
+        <div class="date-month">{{ coleta.mes }}</div>
+        <div class="calendar-icon">📅</div>
+      </div>
+    </div>
+    
+    <div class="schedule-content">
+      <div class="schedule-header">
+        <h3 class="schedule-day">{{ coleta.diaSemana }}</h3>
+        <span class="material-badge badge-{{ coleta.cor }}">{{ coleta.material }}</span>
+      </div>
+      
+      <div class="schedule-details">
+        <div class="detail-item">
+          <span class="detail-icon">🚛</span>
+          <span class="detail-text">{{ coleta.horario }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon">📍</span>
+          <span class="detail-text">{{ coleta.localizacao }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="schedule-actions">
+      <button class="btn btn-secondary">
+        <span>🔔</span>
+        Lembrar-me
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<div class="page-header">
+  <h1 class="page-title">Pontos de Coleta Próximos</h1>
+  <p class="page-subtitle">
+    Encontre os pontos de coleta seletiva mais próximos de você. Cada local aceita diferentes tipos de materiais recicláveis.
+  </p>
+</div>
+
+<div class="collection-points-grid">
+  <div class="collection-point-card" ng-repeat="p in vm.pontos">
+    <div class="card-header">
+      <h3 class="point-name">{{ p.nome }}</h3>
+      <div class="location-icon">📍</div>
+    </div>
+    
+    <div class="point-info">
+      <div class="info-item">
+        <span class="info-icon">📍</span>
+        <span class="info-text">{{ p.distancia || '0.5 km' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">🏠</span>
+        <span class="info-text">{{ p.endereco }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">🕒</span>
+        <span class="info-text">{{ p.horario || 'Seg-Sex: 8h-18h | Sáb: 8h-12h' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-icon">📞</span>
+        <span class="info-text">{{ p.telefone || '(11) 1234-5678' }}</span>
+      </div>
+    </div>
+    
+    <div class="accepted-materials">
+      <span class="material-tag badge-blue" ng-repeat="material in p.materiais">Papel</span>
+      <span class="material-tag badge-red">Plástico</span>
+      <span class="material-tag badge-yellow">Metal</span>
+      <span class="material-tag badge-green">Vidro</span>
+    </div>
+    
+    <div class="card-actions">
+      <button class="btn btn-primary">
+        <span>✈️</span>
+        Como Chegar
+      </button>
+    </div>
+  </div>
+</div>
