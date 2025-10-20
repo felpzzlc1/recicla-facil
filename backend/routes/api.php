@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ColetaController;
+use App\Http\Controllers\CronogramaColetaController;
 use App\Http\Controllers\DoacaoController;
 use App\Http\Controllers\PontoColetaController;
+use App\Http\Controllers\PontuacaoController;
 use App\Http\Middleware\AuthMiddleware;
 
 // Rotas de teste
@@ -13,6 +15,57 @@ Route::get('/test', function () {
         'success' => true,
         'message' => 'API funcionando!',
         'timestamp' => now()
+    ]);
+});
+
+Route::get('/test-proximos', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Rota test-proximos funcionando!',
+        'timestamp' => now()
+    ]);
+});
+
+Route::get('/test-cronograma-proximos', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Rota test-cronograma-proximos funcionando!',
+        'timestamp' => now(),
+        'params' => request()->all()
+    ]);
+});
+
+// Rota simplificada para cronogramas - sem latitude/longitude
+Route::get('/cronograma-simples', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Cronogramas carregados com sucesso!',
+        'data' => [
+            [
+                'id' => 1,
+                'material' => 'Papel',
+                'dia_semana' => 'Segunda-feira',
+                'horario_inicio' => '08:00',
+                'horario_fim' => '12:00',
+                'endereco' => 'Rua das Flores, 123',
+                'bairro' => 'Centro',
+                'cidade' => 'São Paulo',
+                'estado' => 'SP',
+                'observacoes' => 'Coleta de papel reciclável'
+            ],
+            [
+                'id' => 2,
+                'material' => 'Plástico',
+                'dia_semana' => 'Terça-feira',
+                'horario_inicio' => '14:00',
+                'horario_fim' => '18:00',
+                'endereco' => 'Av. Brasil, 456',
+                'bairro' => 'Jardins',
+                'cidade' => 'São Paulo',
+                'estado' => 'SP',
+                'observacoes' => 'Coleta de plástico reciclável'
+            ]
+        ]
     ]);
 });
 
@@ -31,8 +84,10 @@ Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware(AuthM
 Route::get('/auth/profile', [AuthController::class, 'profile'])->middleware(AuthMiddleware::class);
 Route::put('/auth/profile', [AuthController::class, 'updateProfile'])->middleware(AuthMiddleware::class);
 
-// Rotas públicas
+// Rotas públicas - Pontos de Coleta
 Route::get('/pontos', [PontoColetaController::class, 'index']);
+Route::get('/pontos/proximos', [PontoColetaController::class, 'proximos']);
+Route::post('/pontos', [PontoColetaController::class, 'store']);
 
 // Rotas de coletas
 Route::get('/coletas', [ColetaController::class, 'index']);
@@ -47,5 +102,25 @@ Route::post('/doacoes', [DoacaoController::class, 'store']);
 Route::get('/doacoes/{id}', [DoacaoController::class, 'show']);
 Route::put('/doacoes/{id}', [DoacaoController::class, 'update']);
 Route::delete('/doacoes/{id}', [DoacaoController::class, 'destroy']);
+
+// Rotas de cronograma de coleta
+Route::get('/cronograma', [CronogramaColetaController::class, 'index']);
+Route::post('/cronograma', [CronogramaColetaController::class, 'store']);
+Route::get('/cronograma/proximos', [CronogramaColetaController::class, 'proximos']);
+Route::get('/cronograma/material/{material}', [CronogramaColetaController::class, 'porMaterial']);
+Route::get('/cronograma/dia/{diaSemana}', [CronogramaColetaController::class, 'porDiaSemana']);
+Route::get('/cronograma/cidade/{cidade}', [CronogramaColetaController::class, 'porCidade']);
+Route::get('/cronograma/{id}', [CronogramaColetaController::class, 'show']);
+Route::put('/cronograma/{id}', [CronogramaColetaController::class, 'update']);
+Route::delete('/cronograma/{id}', [CronogramaColetaController::class, 'destroy']);
+
+// Rotas de pontuação
+Route::get('/pontuacao/estatisticas', [PontuacaoController::class, 'obterEstatisticas'])->middleware(AuthMiddleware::class);
+Route::post('/pontuacao/adicionar', [PontuacaoController::class, 'adicionarPontos'])->middleware(AuthMiddleware::class);
+Route::get('/pontuacao/ranking', [PontuacaoController::class, 'obterRanking']);
+Route::get('/pontuacao/conquistas', [PontuacaoController::class, 'obterConquistas'])->middleware(AuthMiddleware::class);
+Route::get('/pontuacao/estatisticas-gerais', [PontuacaoController::class, 'obterEstatisticasGerais']);
+Route::post('/pontuacao/simular-descarte', [PontuacaoController::class, 'simularDescarte'])->middleware(AuthMiddleware::class);
+Route::post('/pontuacao/resetar-semanais', [PontuacaoController::class, 'resetarPontosSemanais']);
 
 

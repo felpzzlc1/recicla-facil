@@ -237,12 +237,202 @@ switch ($path) {
         
     case '/pontos':
         if ($method === 'GET') {
-            $stmt = $pdo->query("SELECT * FROM pontos_coleta ORDER BY nome");
+            $stmt = $pdo->query("SELECT * FROM ponto_coletas WHERE ativo = 1 ORDER BY nome");
             $pontos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             success($pontos);
+        } elseif ($method === 'POST') {
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            // Validações
+            if (empty($input['nome']) || empty($input['endereco'])) {
+                error('Nome e endereço são obrigatórios', 422);
+            }
+            
+            // Validar latitude e longitude apenas se fornecidos
+            if (!empty($input['latitude']) && !is_numeric($input['latitude'])) {
+                error('Latitude deve ser um número válido', 422);
+            }
+            
+            if (!empty($input['longitude']) && !is_numeric($input['longitude'])) {
+                error('Longitude deve ser um número válido', 422);
+            }
+            
+            // Inserir ponto de coleta
+            $stmt = $pdo->prepare("INSERT INTO ponto_coletas (nome, tipo, endereco, latitude, longitude, telefone, horario, materiais_aceitos, ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $input['nome'],
+                $input['tipo'] ?? 'Ponto de Coleta',
+                $input['endereco'],
+                $input['latitude'],
+                $input['longitude'],
+                $input['telefone'] ?? null,
+                $input['horario'] ?? null,
+                json_encode($input['materiais'] ?? []),
+                true
+            ]);
+            
+            $pontoId = $pdo->lastInsertId();
+            $stmt = $pdo->prepare("SELECT * FROM ponto_coletas WHERE id = ?");
+            $stmt->execute([$pontoId]);
+            $ponto = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            success($ponto, 'Ponto de coleta cadastrado com sucesso', 201);
         }
         break;
+        
+    case '/pontos/proximos':
+        if ($method === 'GET') {
+            $lat = $_GET['lat'] ?? null;
+            $lng = $_GET['lng'] ?? null;
+            
+            if (!$lat || !$lng) {
+                error('Latitude e longitude são obrigatórios', 400);
+            }
+            
+            // Buscar pontos cadastrados pelos usuários
+            $stmt = $pdo->prepare("SELECT * FROM ponto_coletas WHERE ativo = 1");
+            $stmt->execute();
+            $pontos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Calcular distância para cada ponto e agrupar por cidade
+            $pontosPorCidade = [];
+            $pontosComDistancia = [];
+            
+            foreach ($pontos as $ponto) {
+                // Calcular distância apenas se o ponto tiver coordenadas
+                if ($ponto['latitude'] && $ponto['longitude']) {
+                    $distancia = calcularDistancia($lat, $lng, $ponto['latitude'], $ponto['longitude']);
+                    $ponto['distancia'] = round($distancia, 2) . ' km';
+                    $ponto['distancia_km'] = round($distancia, 2);
+                } else {
+                    $ponto['distancia'] = 'Distância não disponível';
+                    $ponto['distancia_km'] = 999999; // Valor alto para ordenar por último
+                }
+                $ponto['materiais'] = json_decode($ponto['materiais_aceitos'] ?? '[]', true);
+                
+                // Extrair cidade do endereço (assumindo formato: "Rua, Bairro, Cidade - Estado")
+                $endereco = $ponto['endereco'];
+                $cidade = extrairCidade($endereco);
+                
+                if (!isset($pontosPorCidade[$cidade])) {
+                    $pontosPorCidade[$cidade] = [];
+                }
+                $pontosPorCidade[$cidade][] = $ponto;
+            }
+            
+            // Ordenar cidades por distância média
+            $cidadesOrdenadas = [];
+            foreach ($pontosPorCidade as $cidade => $pontosCidade) {
+                $distanciaMedia = array_sum(array_column($pontosCidade, 'distancia_km')) / count($pontosCidade);
+                $cidadesOrdenadas[$cidade] = $distanciaMedia;
+            }
+            asort($cidadesOrdenadas);
+            
+            // Retornar pontos da cidade mais próxima
+            $cidadeMaisProxima = array_key_first($cidadesOrdenadas);
+            $pontosComDistancia = $pontosPorCidade[$cidadeMaisProxima] ?? [];
+            
+            // Ordenar pontos da cidade por distância
+            usort($pontosComDistancia, function($a, $b) {
+                return $a['distancia_km'] <=> $b['distancia_km'];
+            });
+            
+            success([
+                'pontos' => $pontosComDistancia,
+                'cidade' => $cidadeMaisProxima,
+                'localizacao' => [
+                    'latitude' => $lat,
+                    'longitude' => $lng
+                ],
+                'total' => count($pontosComDistancia)
+            ]);
+        }
+        break;
+        
+    case '/pontos/raio':
+        if ($method === 'GET') {
+            $lat = $_GET['lat'] ?? null;
+            $lng = $_GET['lng'] ?? null;
+            $raio = $_GET['raio'] ?? 10000;
+            
+            if (!$lat || !$lng) {
+                error('Latitude e longitude são obrigatórios', 400);
+            }
+            
+            $stmt = $pdo->query("SELECT * FROM ponto_coletas WHERE ativo = 1 LIMIT 20");
+            $pontos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Calcular distância para cada ponto
+            $pontosComDistancia = [];
+            foreach ($pontos as $ponto) {
+                // Calcular distância apenas se o ponto tiver coordenadas
+                if ($ponto['latitude'] && $ponto['longitude']) {
+                    $distancia = calcularDistancia($lat, $lng, $ponto['latitude'], $ponto['longitude']);
+                    $ponto['distancia'] = round($distancia, 2) . ' km';
+                    $ponto['distancia_km'] = round($distancia, 2);
+                } else {
+                    $ponto['distancia'] = 'Distância não disponível';
+                    $ponto['distancia_km'] = 999999; // Valor alto para ordenar por último
+                }
+                $ponto['materiais'] = json_decode($ponto['materiais_aceitos'] ?? '[]', true);
+                $pontosComDistancia[] = $ponto;
+            }
+            
+            // Ordenar por distância
+            usort($pontosComDistancia, function($a, $b) {
+                return $a['distancia_km'] <=> $b['distancia_km'];
+            });
+            
+            success([
+                'pontos' => $pontosComDistancia,
+                'localizacao' => ['latitude' => $lat, 'longitude' => $lng],
+                'raio_km' => $raio,
+                'total' => count($pontosComDistancia)
+            ]);
+        }
+        break;
+        
         
     default:
         error('Rota não encontrada', 404);
 }
+
+// Função para calcular distância entre dois pontos (Haversine)
+function calcularDistancia($lat1, $lon1, $lat2, $lon2) {
+    $earthRadius = 6371; // Raio da Terra em km
+    
+    $lat1 = deg2rad($lat1);
+    $lon1 = deg2rad($lon1);
+    $lat2 = deg2rad($lat2);
+    $lon2 = deg2rad($lon2);
+    
+    $dlat = $lat2 - $lat1;
+    $dlon = $lon2 - $lon1;
+    
+    $a = sin($dlat/2) * sin($dlat/2) + cos($lat1) * cos($lat2) * sin($dlon/2) * sin($dlon/2);
+    $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+    
+    return $earthRadius * $c;
+}
+
+// Função para extrair cidade do endereço
+function extrairCidade($endereco) {
+    // Assumindo formato: "Rua, Bairro, Cidade - Estado" ou "Rua, Cidade - Estado"
+    $partes = explode(',', $endereco);
+    
+    if (count($partes) >= 2) {
+        $ultimaParte = trim(end($partes));
+        
+        // Se contém " - ", pegar a parte antes do " - "
+        if (strpos($ultimaParte, ' - ') !== false) {
+            $cidade = explode(' - ', $ultimaParte)[0];
+            return trim($cidade);
+        }
+        
+        return $ultimaParte;
+    }
+    
+    // Fallback: retornar o endereço completo se não conseguir extrair
+    return $endereco;
+}
+
