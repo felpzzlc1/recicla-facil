@@ -23,8 +23,20 @@
     </a>
   </nav>
   
-  <div class="header-actions">
-    <a href="#!/login" class="btn btn-secondary">Entrar</a>
-    <a href="#!/cadastro" class="btn btn-primary">Cadastrar</a>
+  <div class="header-actions" ng-controller="AuthModalController as authModal">
+    <!-- Usuário não logado -->
+    <div ng-if="!authModal.isLoggedIn()">
+      <button class="btn btn-secondary" ng-click="authModal.openModal('login')">Entrar</button>
+      <button class="btn btn-primary" ng-click="authModal.openModal('register')">Cadastrar</button>
+    </div>
+    
+    <!-- Usuário logado -->
+    <div ng-if="authModal.isLoggedIn()" class="user-menu">
+      <span class="user-info">
+        Olá, {{ authModal.getUser().nome }}!
+        <span class="user-points">({{ authModal.getUser().pontuacao }} pontos)</span>
+      </span>
+      <button class="btn btn-secondary" ng-click="authModal.logout()">Sair</button>
+    </div>
   </div>
 </div>

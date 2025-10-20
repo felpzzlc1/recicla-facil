@@ -7,7 +7,13 @@
       vm.items = [];
 
       function load(){
-        DoacaoService.list().then(function(items){ vm.items = items; });
+        DoacaoService.list().then(function(items){ 
+          console.log('Doações carregadas:', items);
+          vm.items = Array.isArray(items) ? items : [];
+        }).catch(function(err) {
+          console.error('Erro ao carregar doações:', err);
+          vm.items = [];
+        });
       }
       load();
 

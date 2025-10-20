@@ -25,6 +25,7 @@
   <!-- Services -->
   <script src="app/services/apiClient.js"></script>
   <script src="app/services/authService.js"></script>
+  <script src="app/services/modalService.js"></script>
   <script src="app/services/coletaService.js"></script>
   <script src="app/services/doacaoService.js"></script>
   <script src="app/services/pontoColetaService.js"></script>
@@ -32,6 +33,7 @@
   <!-- Controllers -->
   <script src="app/controllers/HomeController.js"></script>
   <script src="app/controllers/LoginController.js"></script>
+  <script src="app/controllers/AuthModalController.js"></script>
   <script src="app/controllers/SolicitarColetaController.js"></script>
   <script src="app/controllers/DoacoesController.js"></script>
   <script src="app/controllers/PontosColetaController.js"></script>
@@ -46,5 +48,8 @@
     <div ng-view class="view"></div>
   </main>
   <footer ng-include="'app/templates/footer.html'"></footer>
+  
+  <!-- Modal de Autenticação -->
+  <div ng-include="'app/templates/auth-modal.html'"></div>
 </body>
 </html>

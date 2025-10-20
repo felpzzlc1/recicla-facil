@@ -31,6 +31,7 @@ class ColetaController extends Controller
         ]);
 
         $data['status'] = 'ABERTA';
+        $data['user_id'] = $request->header('X-User-ID', 1); // Simulação - em produção usar middleware de auth
         $created = $this->repo->create($data);
         return ApiResponse::success($created, 'Criado', 201);
     }

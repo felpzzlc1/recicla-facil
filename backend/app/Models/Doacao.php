@@ -10,6 +10,7 @@ class Doacao extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'material',
         'qtd',
         'contato',
@@ -19,6 +20,11 @@ class Doacao extends Model
     protected $casts = [
         'entregue' => 'boolean',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
 
 

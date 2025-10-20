@@ -28,8 +28,27 @@
       })();
 
       // Real HTTP client
-      function httpRequest(method, url, data){
-        var cfg = { method: method, url: APP_CONFIG.API_BASE_URL + url, data: data };
+      function httpRequest(method, url, data, token){
+        var cfg = { 
+          method: method, 
+          url: APP_CONFIG.API_BASE_URL + url, 
+          data: data,
+          headers: {}
+        };
+        
+        // Adicionar token de autenticação se disponível
+        if (token) {
+          cfg.headers['Authorization'] = 'Bearer ' + token;
+        } else {
+          // Tentar obter token da sessão
+          try {
+            var session = JSON.parse(localStorage.getItem('rf_session') || 'null');
+            if (session && session.token) {
+              cfg.headers['Authorization'] = 'Bearer ' + session.token;
+            }
+          } catch(e) {}
+        }
+        
         return $http(cfg).then(function(res){ return res.data; });
       }
 
@@ -49,18 +68,29 @@
 
       function handleMock(method, url, data){
         // AUTH
+        if(url === '/auth/register' && method === 'POST'){
+          var users = lsGet('rf_users', []);
+          var existing = users.find(function(x){ return x.email === data.email; });
+          if(existing) throw { message: 'Email já cadastrado' };
+          var newUser = { id: uid(), email: data.email, senha: data.senha, nome: data.nome, telefone: data.telefone, pontuacao: 0 };
+          users.push(newUser);
+          lsSet('rf_users', users);
+          var session = { logged: true, user: newUser, profile: { id:newUser.id, email:newUser.email, nome:newUser.nome, telefone:newUser.telefone, pontuacao: newUser.pontuacao } };
+          lsSet('rf_session', session);
+          return { success: true, data: session.profile };
+        }
         if(url === '/auth/login' && method === 'POST'){
           var users = lsGet('rf_users', []);
           var u = users.find(function(x){ return x.email === data.email && x.senha === data.senha; });
           if(!u) throw { message: 'Credenciais inválidas' };
-          var session = { logged: true, profile: { id:u.id, email:u.email, nome:u.nome, telefone:u.telefone } };
+          var session = { logged: true, user: u, profile: { id:u.id, email:u.email, nome:u.nome, telefone:u.telefone, pontuacao: u.pontuacao } };
           lsSet('rf_session', session);
-          return session.profile;
+          return { success: true, data: session.profile };
         }
         if(url === '/auth/profile' && method === 'GET'){
           var s = lsGet('rf_session', { logged:false });
           if(!s.logged) throw { message: 'Não autenticado' };
-          return s.profile;
+          return { success: true, data: s.profile };
         }
         if(url === '/auth/profile' && method === 'PUT'){
           var sess = lsGet('rf_session', { logged:false });
@@ -74,66 +104,70 @@
             lsSet('rf_users', users);
           }
           lsSet('rf_session', sess);
-          return sess.profile;
+          return { success: true, data: sess.profile };
         }
 
         // COLETAS
         if(url === '/coletas' && method === 'GET'){
-          return lsGet('rf_coletas', []);
+          return { success: true, data: lsGet('rf_coletas', []) };
         }
         if(url === '/coletas' && method === 'POST'){
           var list = lsGet('rf_coletas', []);
-          var item = angular.extend({ id: uid(), status: 'ABERTA', criadoEm: new Date().toISOString() }, data);
-          list.push(item); lsSet('rf_coletas', list); return item;
+          var sess = lsGet('rf_session', { logged: false });
+          var item = angular.extend({ id: uid(), user_id: sess.user ? sess.user.id : null, status: 'ABERTA', criadoEm: new Date().toISOString() }, data);
+          list.push(item); lsSet('rf_coletas', list); 
+          return { success: true, data: item };
         }
         if(url.startsWith('/coletas/') && method === 'PUT'){
           var id = url.split('/')[2];
           var items = lsGet('rf_coletas', []);
           var i = items.findIndex(function(x){ return x.id === id; });
-          if(i >= 0){ items[i] = angular.extend({}, items[i], data); lsSet('rf_coletas', items); return items[i]; }
+          if(i >= 0){ items[i] = angular.extend({}, items[i], data); lsSet('rf_coletas', items); return { success: true, data: items[i] }; }
           throw { message: 'Coleta não encontrada' };
         }
         if(url.startsWith('/coletas/') && method === 'DELETE'){
           var idd = url.split('/')[2];
           var arr = lsGet('rf_coletas', []);
           arr = arr.filter(function(x){ return x.id !== idd; });
-          lsSet('rf_coletas', arr); return { ok:true };
+          lsSet('rf_coletas', arr); return { success: true, data: { ok:true } };
         }
 
         // DOACOES
         if(url === '/doacoes' && method === 'GET'){
-          return lsGet('rf_doacoes', []);
+          return { success: true, data: lsGet('rf_doacoes', []) };
         }
         if(url === '/doacoes' && method === 'POST'){
           var dl = lsGet('rf_doacoes', []);
-          var d = angular.extend({ id: uid(), criadoEm: new Date().toISOString(), entregue:false }, data);
-          dl.push(d); lsSet('rf_doacoes', dl); return d;
+          var sess = lsGet('rf_session', { logged: false });
+          var d = angular.extend({ id: uid(), user_id: sess.user ? sess.user.id : null, criadoEm: new Date().toISOString(), entregue:false }, data);
+          dl.push(d); lsSet('rf_doacoes', dl); 
+          return { success: true, data: d };
         }
         if(url.startsWith('/doacoes/') && method === 'PUT'){
           var did = url.split('/')[2];
           var ds = lsGet('rf_doacoes', []);
           var di = ds.findIndex(function(x){ return x.id === did; });
-          if(di >= 0){ ds[di] = angular.extend({}, ds[di], data); lsSet('rf_doacoes', ds); return ds[di]; }
+          if(di >= 0){ ds[di] = angular.extend({}, ds[di], data); lsSet('rf_doacoes', ds); return { success: true, data: ds[di] }; }
           throw { message: 'Doação não encontrada' };
         }
         if(url.startsWith('/doacoes/') && method === 'DELETE'){
           var rid = url.split('/')[2];
           var da = lsGet('rf_doacoes', []);
           da = da.filter(function(x){ return x.id != rid; });
-          lsSet('rf_doacoes', da); return { ok:true };
+          lsSet('rf_doacoes', da); return { success: true, data: { ok:true } };
         }
 
         // PONTOS
         if(url === '/pontos' && method === 'GET'){
-          return lsGet('rf_pontos', []);
+          return { success: true, data: lsGet('rf_pontos', []) };
         }
 
         throw { message: 'Rota mock não mapeada: ' + method + ' ' + url };
       }
 
       return {
-        request: function(method, url, data){
-          return USE_MOCK ? mockRequest(method, url, data) : httpRequest(method, url, data);
+        request: function(method, url, data, token){
+          return USE_MOCK ? mockRequest(method, url, data) : httpRequest(method, url, data, token);
         }
       };
     }]);

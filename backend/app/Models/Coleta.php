@@ -10,6 +10,7 @@ class Coleta extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'material',
         'quantidade',
         'endereco',
@@ -22,6 +23,11 @@ class Coleta extends Model
         'quantidade' => 'decimal:2',
         'data_preferida' => 'date',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
 
 

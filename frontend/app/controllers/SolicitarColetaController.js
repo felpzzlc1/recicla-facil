@@ -7,7 +7,13 @@
       vm.items = [];
 
       function load(){ 
-        ColetaService.list().then(function(items){ vm.items = items; });
+        ColetaService.list().then(function(items){ 
+          console.log('Coletas carregadas:', items);
+          vm.items = Array.isArray(items) ? items : [];
+        }).catch(function(err) {
+          console.error('Erro ao carregar coletas:', err);
+          vm.items = [];
+        });
       }
       load();
 

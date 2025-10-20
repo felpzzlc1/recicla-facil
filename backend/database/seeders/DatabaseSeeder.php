@@ -9,6 +9,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call([
+            UserSeeder::class,
+        ]);
+
         PontoColeta::query()->truncate();
         PontoColeta::insert([
             [ 'nome' => 'Eco Ponto Centro', 'tipo' => 'Papel/Plástico', 'endereco' => 'Av. Central, 100' ],

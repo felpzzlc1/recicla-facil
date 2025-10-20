@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('doacoes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('material');
             $table->integer('qtd');
             $table->string('contato');
