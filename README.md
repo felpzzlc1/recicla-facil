@@ -1,86 +1,151 @@
-# Recicla Fácil - Docker Setup
+# Recicla Fácil
 
-Este projeto contém a aplicação completa Recicla Fácil com frontend (AngularJS) e backend (Laravel) rodando em containers Docker.
+Sistema completo de gestão de reciclagem que conecta cidadãos, pontos de coleta e serviços de coleta domiciliar, promovendo a sustentabilidade através de uma plataforma gamificada com sistema de pontuação e recompensas.
 
-## Arquitetura
+## Visão Geral
 
-- **Frontend**: AngularJS servido via Nginx na porta 9160
-- **Backend**: Laravel API com PHP-FPM
-- **Database**: MySQL 8.0
-- **Proxy**: Nginx faz proxy reverso de `/api` para o backend
+O Recicla Fácil é uma aplicação web que facilita o processo de reciclagem ao conectar usuários com pontos de coleta próximos e permitir solicitações de coleta domiciliar. O sistema inclui funcionalidades de gamificação com pontuação por ações sustentáveis, cronograma de coletas, sistema de recompensas e conquistas, incentivando a participação ativa dos usuários na preservação ambiental.
 
-## Comandos para Executar
+## Arquitetura (Monorepo)
 
-### Limpar ambiente anterior
-```powershell
-# parar e remover tudo do compose atual
-docker compose down --remove-orphans
-
-# remover imagens antigas (ignorar erro se não existirem)
-docker rmi recicla-facil-backend; if ($?) { echo "Imagem backend removida" } else { echo "Imagem backend não existia" }
-docker rmi recicla-facil-frontend; if ($?) { echo "Imagem frontend removida" } else { echo "Imagem frontend não existia" }
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend       │    │   Database      │
+│   (AngularJS)   │◄──►│   (Laravel)     │◄──►│   (MySQL 8.0)  │
+│   Porta: 9160   │    │   Porta: 9161   │    │   Porta: 33061  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### Build e subida com nomes e tags exigidos
-```powershell
-# build e subida com nomes e tags exigidos
+| Diretório | Propósito | Tecnologia |
+|-----------|-----------|------------|
+| `frontend/` | Interface do usuário SPA | AngularJS 1.8.3 + Nginx |
+| `backend/` | API REST e lógica de negócio | Laravel + PHP 8.2 |
+| `database/` | Migrações e seeders | MySQL 8.0 |
+
+## Stack & Principais Tecnologias
+
+### Backend
+- **Linguagem:** PHP 8.2
+- **Framework:** Laravel (Illuminate Database)
+- **Banco de Dados:** MySQL 8.0
+- **Servidor:** Nginx + PHP-FPM
+- **Containerização:** Docker
+
+### Frontend
+- **Framework:** AngularJS 1.8.3
+- **Servidor:** Nginx Alpine
+- **Roteamento:** Angular Route
+- **HTTP Client:** Angular $http
+- **Containerização:** Docker
+
+### Infraestrutura
+- **Orquestração:** Docker Compose
+- **Proxy Reverso:** Nginx
+- **Banco de Dados:** MySQL 8.0
+- **Rede:** Bridge Network
+
+## Como Rodar (Local)
+
+### Pré-requisitos
+- Docker e Docker Compose
+- Git
+
+### Instalação e Execução
+
+```bash
+# Clonar o repositório
+git clone <repository-url>
+cd recicla-facil
+
+# Build e inicialização dos containers
 docker compose build --no-cache
 docker compose up -d
-```
 
-### Verificar se está funcionando
-```powershell
-# verificar containers
+# Verificar status dos containers
 docker ps
-
-# testar frontend
-curl -I http://localhost:9160
-
-# testar API (se houver endpoint de health)
-curl -I http://localhost:9160/api/health
 ```
 
-## Endpoints
+### Acessos
+- **Frontend:** http://localhost:9160
+- **API Backend:** http://localhost:9160/api/*
+- **Database:** localhost:33061
 
-- **Frontend**: http://localhost:9160
-- **API Backend**: http://localhost:9160/api/*
-- **Database**: localhost:33061 (MySQL)
+## Configuração de Ambiente (resumo, sem nomes/valores)
 
-## Estrutura dos Containers
+O sistema utiliza variáveis de ambiente para configuração do banco de dados e aplicação. Crie um arquivo `.env` com credenciais locais e endpoints adequados ao seu ambiente. Evite commitar segredos.
 
-### Imagens (exatas conforme solicitado)
-- `recicla-facil-backend`
-- `recicla-facil-frontend`
+> TODO: Ajustar variáveis de ambiente conforme documentação interna.
 
-### Containers (exatos conforme solicitado)
-- `recicla_facil_backend`
-- `recicla_facil_frontend`
-- `recicla_facil_db`
+## Docker
 
-## Configuração
+### Comandos Principais
 
-O frontend está configurado para consumir a API em `http://localhost:9160/api` (configurado no `window.APP_CONFIG` do `index.html`).
+```bash
+# Inicializar todos os serviços
+docker compose up -d
 
-O Nginx no frontend faz proxy reverso de todas as requisições `/api/*` para o container do backend.
+# Parar todos os serviços
+docker compose down
 
-## Troubleshooting
+# Rebuild completo
+docker compose build --no-cache
+docker compose up -d
 
-### Ver logs dos containers
-```powershell
+# Ver logs
 docker compose logs -f
-```
 
-### Acessar container do backend
-```powershell
+# Acessar container do backend
 docker exec -it recicla_facil_backend bash
-```
 
-### Acessar container do frontend
-```powershell
+# Acessar container do frontend
 docker exec -it recicla_facil_frontend sh
 ```
 
-### Verificar conectividade entre containers
-```powershell
-docker exec -it recicla_facil_frontend ping recicla_facil_backend
-```
+## Scripts Úteis
+
+| Comando | Descrição |
+|---------|-----------|
+| `docker compose up -d` | Inicia todos os serviços em background |
+| `docker compose down` | Para e remove containers |
+| `docker compose build --no-cache` | Rebuild completo das imagens |
+| `docker compose logs -f` | Visualiza logs em tempo real |
+| `docker exec -it recicla_facil_backend bash` | Acessa terminal do backend |
+| `docker exec -it recicla_facil_frontend sh` | Acessa terminal do frontend |
+
+## Funcionalidades Principais
+
+### Para Usuários
+- **Autenticação:** Registro e login de usuários
+- **Solicitação de Coleta:** Agendamento de coleta domiciliar
+- **Pontos de Coleta:** Visualização de pontos próximos no mapa
+- **Cronograma:** Consulta de datas de coleta
+- **Pontuação:** Sistema de pontos por ações sustentáveis
+- **Recompensas:** Resgate de benefícios com pontos
+- **Perfil:** Gerenciamento de dados pessoais
+
+### Para Administradores
+- **Gestão de Coletas:** Aprovação e controle de solicitações
+- **Pontos de Coleta:** Cadastro e manutenção de locais
+- **Cronograma:** Definição de datas de coleta
+- **Recompensas:** Criação e gestão de benefícios
+- **Relatórios:** Acompanhamento de métricas
+
+## Estrutura do Banco de Dados
+
+O sistema inclui as seguintes entidades principais:
+- **Users:** Usuários do sistema
+- **Coletas:** Solicitações de coleta
+- **PontoColetas:** Pontos de coleta cadastrados
+- **CronogramaColetas:** Datas programadas de coleta
+- **Pontuacoes:** Histórico de pontos dos usuários
+- **Recompensas:** Benefícios disponíveis
+- **Conquistas:** Sistema de badges
+- **Doacoes:** Registro de doações
+
+## Licença
+
+> TODO: Definir licença do projeto.
+
+## Créditos
+
+Sistema desenvolvido para promoção da sustentabilidade e gestão eficiente de resíduos recicláveis.
