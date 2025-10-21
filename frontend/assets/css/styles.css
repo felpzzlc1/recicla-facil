@@ -698,7 +698,7 @@ footer {
 .page-title {
   font-size: 36px;
   font-weight: 700;
-  color: var(--primary-green);
+  color: var(--dark-gray);
   margin: 0 0 16px 0;
 }
 
@@ -706,7 +706,6 @@ footer {
   font-size: 16px;
   color: var(--dark-gray);
   max-width: 600px;
-  margin: 0 auto;
   line-height: 1.6;
 }
 

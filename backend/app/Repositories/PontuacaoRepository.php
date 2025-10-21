@@ -7,7 +7,7 @@ use PDO;
 class PontuacaoRepository
 {
     private $pdo;
-    
+
     public function __construct()
     {
         $host = 'db';
@@ -18,7 +18,7 @@ class PontuacaoRepository
         $this->pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
-    
+
     public function obterPontuacaoUsuario($userId)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM pontuacoes WHERE user_id = ?");
@@ -41,7 +41,7 @@ class PontuacaoRepository
             0,
             date('Y-m-d H:i:s')
         ]);
-        
+
         return $this->obterPontuacaoUsuario($userId);
     }
 
@@ -53,42 +53,31 @@ class PontuacaoRepository
             $pontuacao = $this->criarPontuacaoInicial($userId);
         }
 
-        // Aplicar lógica de adicionar pontos usando PDO
         $hoje = date('Y-m-d H:i:s');
         $ultimaAtualizacao = $pontuacao->ultima_atualizacao ? $pontuacao->ultima_atualizacao : null;
-        
-        // Verificar se precisa resetar pontos semanais (nova semana)
         $inicioSemana = date('Y-m-d', strtotime('monday this week'));
         if (!$ultimaAtualizacao || date('Y-m-d', strtotime($ultimaAtualizacao)) < $inicioSemana) {
             $pontosSemanaAtual = 0;
         } else {
             $pontosSemanaAtual = $pontuacao->pontos_semana_atual;
         }
-        
-        // Verificar sequência de dias
+
         $sequenciaDias = $pontuacao->sequencia_dias;
         if ($ultimaAtualizacao) {
             $diferencaDias = (strtotime($hoje) - strtotime($ultimaAtualizacao)) / (60 * 60 * 24);
             
             if ($diferencaDias == 0) {
-                // Mesmo dia - não incrementar sequência
+                // Mesmo dia
             } elseif ($diferencaDias == 1) {
-                // Dia seguinte - incrementar sequência
                 $sequenciaDias += 1;
             } else {
-                // Mais de 1 dia de diferença - resetar sequência
                 $sequenciaDias = 1;
             }
         } else {
-            // Primeira vez - iniciar sequência
             $sequenciaDias = 1;
         }
-        
-        // Calcular novo nível
         $novosPontos = $pontuacao->pontos + $pontos;
         $novoNivel = $this->calcularNivel($novosPontos);
-        
-        // Atualizar no banco
         $stmt = $this->pdo->prepare("UPDATE pontuacoes SET pontos = ?, nivel = ?, nivel_nome = ?, descartes = ?, sequencia_dias = ?, pontos_semana_atual = ?, total_pontos_ganhos = ?, ultima_atualizacao = ? WHERE user_id = ?");
         $stmt->execute([
             $novosPontos,
@@ -101,16 +90,15 @@ class PontuacaoRepository
             $hoje,
             $userId
         ]);
-        
-        // Buscar pontuação atualizada
+
         $pontuacaoAtualizada = $this->obterPontuacaoUsuario($userId);
-        
+
         return [
             'pontuacao' => $pontuacaoAtualizada,
             'novas_conquistas' => [] // Por enquanto, sem conquistas
         ];
     }
-    
+
     private function calcularNivel($pontos)
     {
         if ($pontos < 100) return ['nivel' => 1, 'nome' => 'Iniciante'];
@@ -160,33 +148,33 @@ class PontuacaoRepository
             'conquistas' => []
         ];
     }
-    
+
     private function pontosParaProximoNivel($pontos, $nivel)
     {
         $niveis = [
             1 => 100, 2 => 500, 3 => 1000, 4 => 2500, 5 => 5000,
             6 => 10000, 7 => 25000, 8 => 50000, 9 => 100000, 10 => 999999
         ];
-        
+
         $proximoNivel = $nivel + 1;
         $pontosNecessarios = $niveis[$proximoNivel] ?? 999999;
-        
+
         return max(0, $pontosNecessarios - $pontos);
     }
-    
+
     private function calcularProgressoNivel($pontos, $nivel)
     {
         $niveis = [
             1 => 100, 2 => 500, 3 => 1000, 4 => 2500, 5 => 5000,
             6 => 10000, 7 => 25000, 8 => 50000, 9 => 100000, 10 => 999999
         ];
-        
+
         $pontosNivelAtual = $niveis[$nivel - 1] ?? 0;
         $pontosProximoNivel = $niveis[$nivel] ?? 999999;
-        
+
         $pontosNecessarios = $pontosProximoNivel - $pontosNivelAtual;
         $pontosAtuais = $pontos - $pontosNivelAtual;
-        
+
         return min(100, max(0, ($pontosAtuais / $pontosNecessarios) * 100));
     }
 
@@ -227,9 +215,9 @@ class PontuacaoRepository
     {
         $stmt = $this->pdo->query("SELECT COUNT(*) as total_usuarios, SUM(pontos) as total_pontos, SUM(descartes) as total_descartes FROM pontuacoes");
         $result = $stmt->fetch(PDO::FETCH_OBJ);
-        
+
         $mediaPontos = $result->total_usuarios > 0 ? round($result->total_pontos / $result->total_usuarios, 2) : 0;
-        
+
         return [
             'total_usuarios' => $result->total_usuarios,
             'total_pontos' => $result->total_pontos,

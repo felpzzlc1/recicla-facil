@@ -36,5 +36,3 @@ class ColetaRepository
         return Coleta::where('id', $id)->delete();
     }
 }
-
-

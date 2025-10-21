@@ -73,4 +73,3 @@ class ColetaController extends Controller
     }
 }
 
-

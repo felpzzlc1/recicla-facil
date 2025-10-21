@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Conquista extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'pontuacao_id',
         'nome',

@@ -6,8 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
-        "illuminate/database": "^10.0",
-        "illuminate/events": "^10.0"
+        "illuminate/database": "^10.0"
     },
     "require-dev": {},
     "autoload": {
@@ -17,21 +16,12 @@
             "Database\\Seeders\\": "database/seeders/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
     "scripts": {},
     "extra": {},
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
-        }
+        "sort-packages": true
     },
     "minimum-stability": "stable",
     "prefer-stable": true

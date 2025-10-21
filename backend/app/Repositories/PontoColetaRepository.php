@@ -38,7 +38,6 @@ class PontoColetaRepository
             
             return $pontos;
         } catch (\Exception $e) {
-            // Se falhar, retorna pontos simples sem cálculo de distância
             return PontoColeta::where('ativo', true)
                              ->whereNotNull('latitude')
                              ->whereNotNull('longitude')
@@ -117,7 +116,6 @@ class PontoColetaRepository
             ];
         }
 
-        // Ordena por distância
         usort($pontosExemplo, function($a, $b) {
             return $a['distancia_km'] <=> $b['distancia_km'];
         });

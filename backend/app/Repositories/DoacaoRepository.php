@@ -36,5 +36,3 @@ class DoacaoRepository
         return Doacao::where('id', $id)->delete();
     }
 }
-
-

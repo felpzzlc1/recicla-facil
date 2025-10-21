@@ -2,19 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\PontoColetaRepository;
 use App\Helpers\ApiResponse;
 use App\Models\PontoColeta;
 use Illuminate\Http\Request;
 
 class PontoColetaController extends Controller
 {
-    private $repo;
-
-    public function __construct(PontoColetaRepository $repo)
-    {
-        $this->repo = $repo;
-    }
 
     /**
      * Lista todos os pontos de coleta
@@ -42,9 +35,6 @@ class PontoColetaController extends Controller
      */
     public function proximos(Request $request)
     {
-        // Debug: verificar se o método está sendo chamado
-        \Log::info('Método proximos chamado', ['request' => $request->all()]);
-        
         try {
             $latitude = $request->input('lat');
             $longitude = $request->input('lng');
@@ -154,5 +144,3 @@ class PontoColetaController extends Controller
         }
     }
 }
-
-

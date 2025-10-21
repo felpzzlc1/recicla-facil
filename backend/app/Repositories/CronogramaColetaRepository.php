@@ -68,11 +68,8 @@ class CronogramaColetaRepository
     public function buscarProximos(float $latitude, float $longitude, int $raioKm = 50): Collection
     {
         try {
-            // Para simplificar, retornamos todos os cronogramas ativos
-            // Em uma implementação mais robusta, usaríamos cálculos de distância
             $cronogramas = $this->model->ativo()->get();
             
-            // Log para debug
             \Log::info('Busca por cronogramas próximos', [
                 'latitude' => $latitude,
                 'longitude' => $longitude,

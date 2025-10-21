@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
 class UserRepository
@@ -88,7 +87,6 @@ class UserRepository
             return null;
         }
 
-        // Atualizar last_activity
         DB::table('sessions')
             ->where('id', $token)
             ->update(['last_activity' => time()]);
