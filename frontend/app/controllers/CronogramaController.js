@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('reciclaFacilApp')
-    .controller('CronogramaController', ['CronogramaService', '$scope', function(CronogramaService, $scope) {
+    .controller('CronogramaController', ['CronogramaService', 'AuthService', 'ModalService', '$scope', function(CronogramaService, AuthService, ModalService, $scope) {
       var vm = this;
       
       // Estado da aplicação
@@ -248,6 +248,15 @@
             $scope.$apply();
           }
         }, 5000);
+      };
+      
+      // Funções de autenticação
+      vm.isLoggedIn = function() {
+        return AuthService.isLoggedIn();
+      };
+      
+      vm.openLoginModal = function() {
+        ModalService.openModal('login');
       };
       
       // Inicialização

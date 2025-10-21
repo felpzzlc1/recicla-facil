@@ -27,7 +27,10 @@
       <span ng-if="!vm.cidade">Localização detectada - Buscando pontos próximos</span>
     </div>
     <div class="action-buttons">
-      <button class="btn btn-primary" ng-click="vm.abrirModalCadastro()">
+      <button class="btn btn-primary" 
+              ng-class="{'disabled': !vm.isLoggedIn()}"
+              ng-disabled="!vm.isLoggedIn()"
+              ng-click="vm.isLoggedIn() ? vm.abrirModalCadastro() : vm.openLoginModal()">
         <span>➕</span>
         Cadastrar Ponto
       </button>

@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('reciclaFacilApp')
-    .controller('PontosColetaController', ['PontoColetaService', '$scope', function(PontoColetaService, $scope){
+    .controller('PontosColetaController', ['PontoColetaService', 'AuthService', 'ModalService', '$scope', function(PontoColetaService, AuthService, ModalService, $scope){
       var vm = this;
       vm.pontos = [];
       vm.loading = false;
@@ -250,6 +250,15 @@
             $scope.$apply();
           }
         }, 5000);
+      };
+      
+      // Funções de autenticação
+      vm.isLoggedIn = function() {
+        return AuthService.isLoggedIn();
+      };
+      
+      vm.openLoginModal = function() {
+        ModalService.openModal('login');
       };
       
       // Inicialização

@@ -4,7 +4,10 @@
     Fique por dentro dos dias e horários de coleta seletiva no seu bairro. Ative notificações para não perder nenhuma coleta!
   </p>
   <div class="action-buttons">
-    <button class="btn btn-primary" ng-click="vm.abrirModalCadastro()">
+    <button class="btn btn-primary" 
+            ng-class="{'disabled': !vm.isLoggedIn()}"
+            ng-disabled="!vm.isLoggedIn()"
+            ng-click="vm.isLoggedIn() ? vm.abrirModalCadastro() : vm.openLoginModal()">
       <span>➕</span>
       Adicionar Cronograma
     </button>

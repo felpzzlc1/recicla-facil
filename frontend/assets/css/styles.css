@@ -114,6 +114,17 @@ header {
   color: var(--primary-green);
 }
 
+.nav a.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.nav a.disabled:hover {
+  background: transparent;
+  color: inherit;
+}
+
 .nav-icon {
   width: 16px;
   height: 16px;
