@@ -60,7 +60,7 @@
       <button class="btn btn-success btn-simular" ng-click="pontuacaoCtrl.abrirModalDescarte()" 
               ng-if="pontuacaoCtrl.verificarLogin()">
         <span class="btn-icon">♻️</span>
-        Simular Descarte
+        Registrar Descarte
       </button>
     </div>
     
@@ -82,7 +82,7 @@
         <div class="progress-bar">
           <div class="progress-fill" ng-style="{'width': pontuacaoCtrl.progressoNivel + '%', 'background-color': pontuacaoCtrl.obterCorNivel()}"></div>
         </div>
-        <div class="progress-text">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontos || 0) }} / {{ pontuacaoCtrl.formatarNumero((pontuacaoCtrl.pontos || 0) + (pontuacaoCtrl.pontosRestantes || 0)) }}</div>
+        <div class="progress-text">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontosAtuaisNivel || 0) }} / {{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontosNecessariosNivel || 100) }}</div>
       </div>
       
       <div class="next-level" ng-if="pontuacaoCtrl.pontosRestantes > 0">
@@ -148,7 +148,7 @@
 <div ng-if="pontuacaoCtrl.mostrarModalDescarte" class="modal-overlay" ng-click="pontuacaoCtrl.fecharModalDescarte()">
   <div class="modal-content" ng-click="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Simular Descarte</h3>
+      <h3>Registrar Descarte</h3>
       <button class="modal-close" ng-click="pontuacaoCtrl.fecharModalDescarte()">×</button>
     </div>
     
@@ -191,10 +191,10 @@
         Cancelar
       </button>
       <button class="btn btn-success" 
-              ng-click="pontuacaoCtrl.simularDescarte()"
+              ng-click="pontuacaoCtrl.registrarDescarte()"
               ng-disabled="!pontuacaoCtrl.materialSelecionado || !pontuacaoCtrl.pesoDescarte || pontuacaoCtrl.pesoDescarte <= 0">
-        <span ng-if="!pontuacaoCtrl.carregando">Confirmar Descarte</span>
-        <span ng-if="pontuacaoCtrl.carregando">Processando...</span>
+        <span ng-if="!pontuacaoCtrl.carregando">Registrar Descarte</span>
+        <span ng-if="pontuacaoCtrl.carregando">Registrando...</span>
       </button>
     </div>
   </div>

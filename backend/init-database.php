@@ -19,7 +19,6 @@ try {
         email VARCHAR(255) UNIQUE NOT NULL,
         telefone VARCHAR(20) NOT NULL,
         senha VARCHAR(255) NOT NULL,
-        pontuacao INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )";
@@ -97,13 +96,12 @@ try {
     
     if ($userCount == 0) {
         // Inserir usuário demo
-        $stmt = $pdo->prepare("INSERT INTO users (nome, email, telefone, senha, pontuacao) VALUES (?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO users (nome, email, telefone, senha) VALUES (?, ?, ?, ?)");
         $stmt->execute([
             'Usuário Demo',
             'demo@recicla.com',
             '(11) 99999-9999',
-            password_hash('123456', PASSWORD_DEFAULT),
-            150
+            password_hash('123456', PASSWORD_DEFAULT)
         ]);
         echo "Usuário demo criado\n";
         

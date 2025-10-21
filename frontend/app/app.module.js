@@ -65,6 +65,14 @@
         });
       };
 
+      // Registrar descarte
+      service.registrarDescarte = function(material, peso) {
+        return ApiClient.request('POST', baseUrl + '/registrar-descarte', {
+          material: material,
+          peso: peso
+        });
+      };
+
       // Resetar pontos semanais (admin)
       service.resetarPontosSemanais = function() {
         return ApiClient.request('POST', baseUrl + '/resetar-semanais');

@@ -34,7 +34,6 @@
     <div ng-if="authModal.isLoggedIn()" class="user-menu">
       <span class="user-info">
         Olá, {{ authModal.getUser().nome }}!
-        <span class="user-points">({{ authModal.getUser().pontuacao }} pontos)</span>
       </span>
       <button class="btn btn-secondary" ng-click="authModal.logout()">Sair</button>
     </div>

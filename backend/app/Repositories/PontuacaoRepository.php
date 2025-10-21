@@ -67,7 +67,7 @@ class PontuacaoRepository
             $diferencaDias = (strtotime($hoje) - strtotime($ultimaAtualizacao)) / (60 * 60 * 24);
             
             if ($diferencaDias == 0) {
-                // Mesmo dia
+                // Mesmo dia - manter sequência atual
             } elseif ($diferencaDias == 1) {
                 $sequenciaDias += 1;
             } else {

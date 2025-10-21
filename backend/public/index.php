@@ -4,6 +4,9 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-User-ID');
 
+// Incluir classes necessárias
+require_once __DIR__ . '/../app/Repositories/PontuacaoRepository.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -128,7 +131,7 @@ switch ($path) {
             }
             
             // Criar usuário
-            $stmt = $pdo->prepare("INSERT INTO users (nome, email, telefone, senha, pontuacao) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $pdo->prepare("INSERT INTO users (nome, email, telefone, senha) VALUES (?, ?, ?, ?)");
             $stmt->execute([
                 $input['nome'],
                 $input['email'],
@@ -194,7 +197,7 @@ switch ($path) {
     case '/auth/profile':
         if ($method === 'GET') {
             $userId = $_SERVER['HTTP_X_USER_ID'] ?? 1;
-            $stmt = $pdo->prepare("SELECT id, nome, email, telefone, pontuacao FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT id, nome, email, telefone FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -232,7 +235,7 @@ switch ($path) {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($values);
             
-            $stmt = $pdo->prepare("SELECT id, nome, email, telefone, pontuacao FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT id, nome, email, telefone FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -478,38 +481,51 @@ switch ($path) {
                 error('Usuário não autenticado', 401);
             }
             
-            // Obter estatísticas do usuário
-            $stmt = $pdo->prepare("SELECT pontuacao FROM users WHERE id = ?");
+            // Obter estatísticas do usuário da tabela pontuacoes
+            $stmt = $pdo->prepare("SELECT pontos FROM pontuacoes WHERE user_id = ?");
             $stmt->execute([$userId]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $pontuacao = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if (!$user) {
-                error('Usuário não encontrado', 404);
+            if (!$pontuacao) {
+                // Se não existe registro, criar um inicial
+                $stmt = $pdo->prepare("INSERT INTO pontuacoes (user_id, pontos, nivel, nivel_nome, descartes, sequencia_dias, badges_conquistadas, pontos_semana_atual, total_pontos_ganhos, ultima_atualizacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$userId, 0, 1, 'Iniciante', 0, 0, 0, 0, 0, date('Y-m-d H:i:s')]);
+                $pontos = 0;
+            } else {
+                $pontos = $pontuacao['pontos'] ?? 0;
             }
-            
-            $pontos = $user['pontuacao'] ?? 0;
             $nivel = min(10, max(1, floor($pontos / 100) + 1));
             $nivelNome = ['Iniciante', 'Reciclador', 'Eco-amigo', 'Guardião Verde', 'Defensor do Planeta', 'Herói Ambiental', 'Mestre da Reciclagem', 'Lenda Verde', 'Ícone Ecológico', 'Campeão da Terra'][$nivel - 1] ?? 'Mestre';
             $pontosProximoNivel = $nivel * 100;
             $pontosRestantes = max(0, $pontosProximoNivel - $pontos);
             $progressoNivel = min(100, ($pontos % 100) / 100 * 100);
             
-            // Obter estatísticas adicionais
-            // Primeiro, verificar se a tabela coletas existe e tem dados
+            // Obter estatísticas adicionais da tabela pontuacoes
             try {
-                $stmt = $pdo->prepare("SELECT COUNT(*) as descartes FROM coletas WHERE user_id = ? AND status = 'CONCLUIDA'");
+                $stmt = $pdo->prepare("SELECT descartes, sequencia_dias, badges_conquistadas, pontos_semana_atual FROM pontuacoes WHERE user_id = ?");
                 $stmt->execute([$userId]);
-                $descartes = $stmt->fetch(PDO::FETCH_ASSOC)['descartes'] ?? 0;
+                $estatisticas = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($estatisticas) {
+                    $descartes = $estatisticas['descartes'] ?? 0;
+                    $sequenciaDias = $estatisticas['sequencia_dias'] ?? 0;
+                    $badges = $estatisticas['badges_conquistadas'] ?? 0;
+                    $pontosSemanaAtual = $estatisticas['pontos_semana_atual'] ?? 0;
+                } else {
+                    $descartes = 0;
+                    $sequenciaDias = 0;
+                    $badges = 0;
+                    $pontosSemanaAtual = 0;
+                }
             } catch (PDOException $e) {
-                // Se a tabela não existir ou houver erro, usar 0
                 $descartes = 0;
-                error_log("Erro ao buscar descartes: " . $e->getMessage());
+                $sequenciaDias = 0;
+                $badges = 0;
+                $pontosSemanaAtual = 0;
+                error_log("Erro ao buscar estatísticas: " . $e->getMessage());
             }
             
-            // Contar badges conquistadas
-            $stmt = $pdo->prepare("SELECT COUNT(*) as badges FROM conquistas WHERE user_id = ?");
-            $stmt->execute([$userId]);
-            $badges = $stmt->fetch(PDO::FETCH_ASSOC)['badges'] ?? 0;
+            // Badges já obtidos da tabela pontuacoes acima
             
             $estatisticas = [
                 'pontos' => $pontos,
@@ -517,9 +533,9 @@ switch ($path) {
                 'nivel_nome' => $nivelNome,
                 'pontos_para_proximo_nivel' => $pontosRestantes,
                 'progresso_nivel' => $progressoNivel,
-                'pontos_semana_atual' => 0, // Implementar lógica de pontos semanais
-                'descarte' => $descartes,
-                'sequencia_dias' => 0, // Implementar lógica de sequência
+                'pontos_semana_atual' => $pontosSemanaAtual,
+                'descartes' => $descartes,
+                'sequencia_dias' => $sequenciaDias,
                 'badges_conquistadas' => $badges
             ];
             
@@ -532,7 +548,7 @@ switch ($path) {
             $limite = $_GET['limite'] ?? 10;
             
             try {
-                $stmt = $pdo->query("SELECT id, nome, pontuacao FROM users ORDER BY pontuacao DESC LIMIT " . intval($limite));
+                $stmt = $pdo->query("SELECT u.id, u.nome, p.pontos as pontuacao FROM users u LEFT JOIN pontuacoes p ON u.id = p.user_id ORDER BY p.pontos DESC LIMIT " . intval($limite));
                 $ranking = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 // Adicionar posição no ranking
@@ -585,20 +601,21 @@ switch ($path) {
                 $conquistasUsuarioMap[$conquista['conquista_id']] = $conquista;
             }
             
-            // Obter total de descartes do usuário
+            // Obter total de descartes do usuário da tabela pontuacoes
             try {
-                $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM coletas WHERE user_id = ? AND status = 'CONCLUIDA'");
+                $stmt = $pdo->prepare("SELECT descartes FROM pontuacoes WHERE user_id = ?");
                 $stmt->execute([$userId]);
-                $totalDescartes = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+                $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+                $totalDescartes = $resultado ? $resultado['descartes'] : 0;
             } catch (PDOException $e) {
                 $totalDescartes = 0;
                 error_log("Erro ao buscar descartes para conquistas: " . $e->getMessage());
             }
             
             // Obter pontos do usuário para conquistas baseadas em pontos
-            $stmt = $pdo->prepare("SELECT pontuacao FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT pontos FROM pontuacoes WHERE user_id = ?");
             $stmt->execute([$userId]);
-            $pontosUsuario = $stmt->fetch(PDO::FETCH_ASSOC)['pontuacao'] ?? 0;
+            $pontosUsuario = $stmt->fetch(PDO::FETCH_ASSOC)['pontos'] ?? 0;
             
             // Processar conquistas
             $conquistas = [];
@@ -609,11 +626,15 @@ switch ($path) {
                 $desbloqueada = false;
                 $progresso = 0;
                 
-                // Conquistas baseadas em descartes
-                if ($tipo['requisito'] <= 50) { // Conquistas de descartes (1, 5, 10, 25, 50)
+                // Determinar tipo de conquista baseado no requisito
+                // Conquistas de descartes: 1, 5, 10, 25, 50, 100, 250, 500
+                // Conquistas de pontos: 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000
+                if (in_array($tipo['requisito'], [1, 5, 10, 25, 50, 100, 250, 500])) {
+                    // Conquistas baseadas em descartes
                     $desbloqueada = $totalDescartes >= $tipo['requisito'];
                     $progresso = min(100, ($totalDescartes / $tipo['requisito']) * 100);
-                } else { // Conquistas baseadas em pontos (100, 250, 500, 1000, 2500)
+                } else {
+                    // Conquistas baseadas em pontos
                     $desbloqueada = $pontosUsuario >= $tipo['requisito'];
                     $progresso = min(100, ($pontosUsuario / $tipo['requisito']) * 100);
                 }
@@ -658,7 +679,7 @@ switch ($path) {
             $stmt = $pdo->query("SELECT COUNT(*) as total_coletas FROM coletas WHERE status = 'CONCLUIDA'");
             $totalColetas = $stmt->fetch(PDO::FETCH_ASSOC)['total_coletas'] ?? 0;
             
-            $stmt = $pdo->query("SELECT SUM(pontuacao) as total_pontos FROM users");
+            $stmt = $pdo->query("SELECT SUM(pontos) as total_pontos FROM pontuacoes");
             $totalPontos = $stmt->fetch(PDO::FETCH_ASSOC)['total_pontos'] ?? 0;
             
             $estatisticas = [
@@ -712,22 +733,72 @@ switch ($path) {
             
             $pontosGanhos = round($input['peso'] * ($pontosPorKg[$input['material']] ?? 10));
             
-            // Atualizar pontuação do usuário
-            $stmt = $pdo->prepare("UPDATE users SET pontuacao = pontuacao + ? WHERE id = ?");
-            $stmt->execute([$pontosGanhos, $userId]);
-            
-            // Obter nova pontuação
-            $stmt = $pdo->prepare("SELECT pontuacao FROM users WHERE id = ?");
-            $stmt->execute([$userId]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Usar o sistema de pontuação completo
+            $pontuacaoRepo = new \App\Repositories\PontuacaoRepository();
+            $resultado = $pontuacaoRepo->adicionarPontos($userId, $pontosGanhos, 'simular-descarte');
             
             $response = [
                 'pontos_ganhos' => $pontosGanhos,
-                'pontuacao_total' => $user['pontuacao'],
-                'novas_conquistas' => [] // Implementar lógica de conquistas
+                'pontuacao_total' => $resultado['pontuacao']->pontos,
+                'novas_conquistas' => $resultado['novas_conquistas']
             ];
             
             success($response, 'Descarte simulado com sucesso');
+        }
+        break;
+        
+    case '/pontuacao/registrar-descarte':
+        if ($method === 'POST') {
+            // Obter userId do header Authorization
+            $userId = null;
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (strpos($authHeader, 'Bearer ') === 0) {
+                $token = substr($authHeader, 7);
+                try {
+                    $stmt = $pdo->prepare("SELECT user_id FROM sessions WHERE id = ? AND last_activity > ?");
+                    $stmt->execute([$token, time() - 86400]);
+                    $session = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($session) {
+                        $userId = $session['user_id'];
+                    }
+                } catch (PDOException $e) {
+                    error_log("Erro ao buscar sessão: " . $e->getMessage());
+                }
+            }
+            
+            if (!$userId) {
+                error('Usuário não autenticado', 401);
+            }
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($input['material']) || empty($input['peso'])) {
+                error('Material e peso são obrigatórios', 422);
+            }
+            
+            // Calcular pontos baseado no material e peso
+            $pontosPorKg = [
+                'papel' => 10,
+                'plastico' => 15,
+                'vidro' => 20,
+                'metal' => 25,
+                'organico' => 5
+            ];
+            
+            $pontosGanhos = round($input['peso'] * ($pontosPorKg[$input['material']] ?? 10));
+            
+            // Usar o sistema de pontuação completo
+            $pontuacaoRepo = new \App\Repositories\PontuacaoRepository();
+            $resultado = $pontuacaoRepo->adicionarPontos($userId, $pontosGanhos, 'descarte');
+            
+            $response = [
+                'pontos_ganhos' => $pontosGanhos,
+                'material' => $input['material'],
+                'peso' => $input['peso'],
+                'pontuacao' => $resultado['pontuacao'],
+                'novas_conquistas' => $resultado['novas_conquistas']
+            ];
+            
+            success($response, 'Descarte registrado com sucesso');
         }
         break;
         

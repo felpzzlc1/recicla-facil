@@ -53,4 +53,5 @@ Route::get('/pontuacao/ranking', [PontuacaoController::class, 'obterRanking']);
 Route::get('/pontuacao/conquistas', [PontuacaoController::class, 'obterConquistas'])->middleware(AuthMiddleware::class);
 Route::get('/pontuacao/estatisticas-gerais', [PontuacaoController::class, 'obterEstatisticasGerais']);
 Route::post('/pontuacao/simular-descarte', [PontuacaoController::class, 'simularDescarte'])->middleware(AuthMiddleware::class);
+Route::post('/pontuacao/registrar-descarte', [PontuacaoController::class, 'registrarDescarte'])->middleware(AuthMiddleware::class);
 Route::post('/pontuacao/resetar-semanais', [PontuacaoController::class, 'resetarPontosSemanais']);

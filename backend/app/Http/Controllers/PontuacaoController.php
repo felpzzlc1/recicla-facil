@@ -166,6 +166,50 @@ class PontuacaoController extends Controller
     }
 
     /**
+     * Registrar descarte e adicionar pontos
+     */
+    public function registrarDescarte(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'material' => 'required|string|in:papel,plastico,vidro,metal,organico',
+                'peso' => 'required|numeric|min:0.1|max:100'
+            ]);
+
+            $userId = $request->user()->id;
+            $material = $request->input('material');
+            $peso = $request->input('peso');
+
+            // Calcular pontos baseado no material e peso
+            $pontosPorKg = match($material) {
+                'papel' => 10,
+                'plastico' => 15,
+                'vidro' => 20,
+                'metal' => 25,
+                'organico' => 5,
+                default => 10
+            };
+
+            $pontos = round($peso * $pontosPorKg);
+            $motivo = "Descarte de {$material} ({$peso}kg)";
+
+            $resultado = $this->pontuacaoRepository->adicionarPontos($userId, $pontos, 'descarte');
+            
+            $response = [
+                'pontos_ganhos' => $pontos,
+                'material' => $material,
+                'peso' => $peso,
+                'pontuacao' => $resultado['pontuacao'],
+                'novas_conquistas' => $resultado['novas_conquistas']
+            ];
+
+            return ApiResponse::success($response, 'Descarte registrado com sucesso');
+        } catch (\Exception $e) {
+            return ApiResponse::error('Erro ao registrar descarte: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Resetar pontos semanais (para uso administrativo)
      */
     public function resetarPontosSemanais(): JsonResponse

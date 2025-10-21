@@ -12,15 +12,10 @@ class User extends Model
         'email',
         'telefone',
         'senha',
-        'pontuacao',
     ];
 
     protected $hidden = [
         'senha',
-    ];
-
-    protected $casts = [
-        'pontuacao' => 'integer',
     ];
 
     public function setSenhaAttribute($value)

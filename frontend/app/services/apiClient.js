@@ -149,12 +149,12 @@
           var users = lsGet('rf_users', []);
           var existing = users.find(function(x){ return x.email === data.email; });
           if(existing) throw { message: 'Email já cadastrado' };
-          var newUser = { id: uid(), email: data.email, senha: data.senha, nome: data.nome, telefone: data.telefone, pontuacao: 0 };
+          var newUser = { id: uid(), email: data.email, senha: data.senha, nome: data.nome, telefone: data.telefone };
           users.push(newUser);
           lsSet('rf_users', users);
           var token = 'mock_token_' + uid();
           var userWithToken = angular.extend({}, newUser, { token: token });
-          var session = { logged: true, user: userWithToken, profile: { id:newUser.id, email:newUser.email, nome:newUser.nome, telefone:newUser.telefone, pontuacao: newUser.pontuacao }, token: token };
+          var session = { logged: true, user: userWithToken, profile: { id:newUser.id, email:newUser.email, nome:newUser.nome, telefone:newUser.telefone }, token: token };
           lsSet('rf_session', session);
           return { success: true, data: angular.extend({}, session.profile, { token: token }) };
         }
@@ -164,7 +164,7 @@
           if(!u) throw { message: 'Credenciais inválidas' };
           var token = 'mock_token_' + uid();
           var userWithToken = angular.extend({}, u, { token: token });
-          var session = { logged: true, user: userWithToken, profile: { id:u.id, email:u.email, nome:u.nome, telefone:u.telefone, pontuacao: u.pontuacao }, token: token };
+          var session = { logged: true, user: userWithToken, profile: { id:u.id, email:u.email, nome:u.nome, telefone:u.telefone }, token: token };
           lsSet('rf_session', session);
           return { success: true, data: angular.extend({}, session.profile, { token: token }) };
         }

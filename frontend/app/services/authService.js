@@ -23,8 +23,7 @@
         return angular.copy(profileCache || { 
           nome: '', 
           email: '', 
-          telefone: '', 
-          pontuacao: 0 
+          telefone: ''
         });
       }
 

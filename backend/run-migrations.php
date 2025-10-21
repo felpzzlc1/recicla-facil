@@ -34,7 +34,6 @@ try {
                     $table->string('email')->unique();
                     $table->string('telefone');
                     $table->string('senha');
-                    $table->integer('pontuacao')->default(0);
                     $table->timestamps();
                 });
                 echo "✅ Tabela 'users' criada\n";
@@ -118,7 +117,6 @@ try {
             'email' => 'teste@recicla.com',
             'telefone' => '11999999999',
             'senha' => password_hash('123456', PASSWORD_DEFAULT),
-            'pontuacao' => 0,
             'created_at' => now(),
             'updated_at' => now()
         ]);
