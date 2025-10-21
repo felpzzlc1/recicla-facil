@@ -26,6 +26,24 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Criar tabelas se não existirem
+    $pdo->exec("CREATE TABLE IF NOT EXISTS pontuacoes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        pontos INT DEFAULT 0,
+        nivel INT DEFAULT 1,
+        nivel_nome VARCHAR(100) DEFAULT 'Iniciante',
+        descartes INT DEFAULT 0,
+        sequencia_dias INT DEFAULT 0,
+        badges_conquistadas INT DEFAULT 0,
+        pontos_semana_atual INT DEFAULT 0,
+        total_pontos_ganhos INT DEFAULT 0,
+        ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_user_pontuacao (user_id)
+    )");
+    
     $pdo->exec("CREATE TABLE IF NOT EXISTS conquistas (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
@@ -64,6 +82,63 @@ try {
         foreach ($conquistas as $conquista) {
             $stmt->execute($conquista);
         }
+    }
+    
+    // Criar tabelas de recompensas se não existirem
+    $pdo->exec("CREATE TABLE IF NOT EXISTS recompensas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        titulo VARCHAR(255) NOT NULL,
+        descricao TEXT,
+        icone VARCHAR(10),
+        categoria VARCHAR(100),
+        categoria_icone VARCHAR(10),
+        pontos INT NOT NULL,
+        disponivel INT DEFAULT 0,
+        ativo BOOLEAN DEFAULT TRUE,
+        imagem_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+    
+    $pdo->exec("CREATE TABLE IF NOT EXISTS resgate_recompensas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        recompensa_id INT NOT NULL,
+        pontos_gastos INT NOT NULL,
+        status ENUM('PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE') DEFAULT 'PENDENTE',
+        data_resgate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        observacoes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (recompensa_id) REFERENCES recompensas(id) ON DELETE CASCADE
+    )");
+    
+    // Inserir recompensas padrão se não existirem
+    $stmt = $pdo->query("SELECT COUNT(*) FROM recompensas");
+    if ($stmt->fetchColumn() == 0) {
+        $recompensas = [
+            ['Vale Compras R$ 50', 'Vale compras no valor de R$ 50,00 para usar em estabelecimentos parceiros', '🛍️', 'Compras', '✓', 5000, 15],
+            ['Café Grátis', 'Café grátis em estabelecimentos parceiros', '☕', 'Gastronomia', '☕', 500, 50],
+            ['Ingresso Cinema', 'Ingresso para cinema em qualquer filme em cartaz', '🎬', 'Entretenimento', '🎬', 3000, 10],
+            ['Kit Sustentável', 'Kit com produtos sustentáveis e ecológicos', '🌱', 'Eco', '🎁', 2000, 25],
+            ['Vale Compras R$ 100', 'Vale compras no valor de R$ 100,00 para usar em estabelecimentos parceiros', '🛒', 'Compras', '✓', 10000, 8],
+            ['Experiência Eco-Turismo', 'Passeio ecológico em parque natural com guia especializado', '🏔️', 'Turismo', '🧭', 15000, 5],
+            ['Desconto 20% Loja Verde', 'Desconto de 20% em produtos sustentáveis na Loja Verde', '🌿', 'Desconto', '💰', 1500, 30],
+            ['Livro Sustentabilidade', 'Livro sobre sustentabilidade e meio ambiente', '📚', 'Educação', '📖', 800, 20]
+        ];
+        
+        $stmt = $pdo->prepare("INSERT INTO recompensas (titulo, descricao, icone, categoria, categoria_icone, pontos, disponivel) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        foreach ($recompensas as $recompensa) {
+            $stmt->execute($recompensa);
+        }
+    }
+    
+    // Inserir pontuação inicial para usuário padrão se não existir
+    $stmt = $pdo->query("SELECT COUNT(*) FROM pontuacoes WHERE user_id = 1");
+    if ($stmt->fetchColumn() == 0) {
+        $stmt = $pdo->prepare("INSERT INTO pontuacoes (user_id, pontos, nivel, nivel_nome, descartes, sequencia_dias, badges_conquistadas, pontos_semana_atual, total_pontos_ganhos, ultima_atualizacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([1, 8350, 84, 'Campeão da Terra', 50, 7, 8, 500, 8350, date('Y-m-d H:i:s')]);
     }
     
 } catch (PDOException $e) {
@@ -478,7 +553,8 @@ switch ($path) {
             }
             
             if (!$userId) {
-                error('Usuário não autenticado', 401);
+                // Para desenvolvimento, usar usuário padrão se não autenticado
+                $userId = 1; // ID do usuário padrão para desenvolvimento
             }
             
             // Obter estatísticas do usuário da tabela pontuacoes
@@ -799,6 +875,174 @@ switch ($path) {
             ];
             
             success($response, 'Descarte registrado com sucesso');
+        }
+        break;
+        
+    case '/recompensas':
+        if ($method === 'GET') {
+            $stmt = $pdo->query("SELECT * FROM recompensas WHERE ativo = 1 AND disponivel > 0 ORDER BY pontos ASC");
+            $recompensas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            success($recompensas);
+        }
+        break;
+        
+    case (preg_match('/^\/recompensas\/\d+$/', $path) ? $path : false):
+        if ($method === 'GET') {
+            $id = basename($path);
+            $stmt = $pdo->prepare("SELECT * FROM recompensas WHERE id = ? AND ativo = 1");
+            $stmt->execute([$id]);
+            $recompensa = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$recompensa) {
+                error('Recompensa não encontrada', 404);
+            }
+            
+            success($recompensa);
+        }
+        break;
+        
+    case '/recompensas/resgatar':
+        if ($method === 'POST') {
+            // Obter userId do header Authorization
+            $userId = null;
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (strpos($authHeader, 'Bearer ') === 0) {
+                $token = substr($authHeader, 7);
+                try {
+                    $stmt = $pdo->prepare("SELECT user_id FROM sessions WHERE id = ? AND last_activity > ?");
+                    $stmt->execute([$token, time() - 86400]);
+                    $session = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($session) {
+                        $userId = $session['user_id'];
+                    }
+                } catch (PDOException $e) {
+                    error_log("Erro ao buscar sessão: " . $e->getMessage());
+                }
+            }
+            
+            if (!$userId) {
+                error('Usuário não autenticado', 401);
+            }
+            
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($input['recompensa_id'])) {
+                error('ID da recompensa é obrigatório', 422);
+            }
+            
+            // Verificar se a recompensa existe e está disponível
+            $stmt = $pdo->prepare("SELECT * FROM recompensas WHERE id = ? AND ativo = 1 AND disponivel > 0");
+            $stmt->execute([$input['recompensa_id']]);
+            $recompensa = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$recompensa) {
+                error('Recompensa não disponível', 400);
+            }
+            
+            // Verificar se o usuário tem pontos suficientes
+            $stmt = $pdo->prepare("SELECT pontos FROM pontuacoes WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            $pontuacao = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $pontosUsuario = $pontuacao ? $pontuacao['pontos'] : 0;
+            
+            if ($pontosUsuario < $recompensa['pontos']) {
+                error('Pontos insuficientes', 400);
+            }
+            
+            // Iniciar transação
+            $pdo->beginTransaction();
+            
+            try {
+                // Criar o resgate
+                $stmt = $pdo->prepare("INSERT INTO resgate_recompensas (user_id, recompensa_id, pontos_gastos, status, data_resgate) VALUES (?, ?, ?, 'PENDENTE', NOW())");
+                $stmt->execute([$userId, $recompensa['id'], $recompensa['pontos']]);
+                
+                $resgateId = $pdo->lastInsertId();
+                
+                // Decrementar disponibilidade da recompensa
+                $stmt = $pdo->prepare("UPDATE recompensas SET disponivel = disponivel - 1 WHERE id = ?");
+                $stmt->execute([$recompensa['id']]);
+                
+                // Subtrair pontos do usuário
+                $stmt = $pdo->prepare("UPDATE pontuacoes SET pontos = pontos - ? WHERE user_id = ?");
+                $stmt->execute([$recompensa['pontos'], $userId]);
+                
+                $pdo->commit();
+                
+                // Buscar o resgate criado
+                $stmt = $pdo->prepare("SELECT rr.*, r.titulo, r.icone FROM resgate_recompensas rr JOIN recompensas r ON rr.recompensa_id = r.id WHERE rr.id = ?");
+                $stmt->execute([$resgateId]);
+                $resgate = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                success($resgate, 'Recompensa resgatada com sucesso!');
+                
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                error('Erro ao resgatar recompensa: ' . $e->getMessage(), 500);
+            }
+        }
+        break;
+        
+    case '/recompensas/meus-resgates':
+        if ($method === 'GET') {
+            // Obter userId do header Authorization
+            $userId = null;
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (strpos($authHeader, 'Bearer ') === 0) {
+                $token = substr($authHeader, 7);
+                try {
+                    $stmt = $pdo->prepare("SELECT user_id FROM sessions WHERE id = ? AND last_activity > ?");
+                    $stmt->execute([$token, time() - 86400]);
+                    $session = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($session) {
+                        $userId = $session['user_id'];
+                    }
+                } catch (PDOException $e) {
+                    error_log("Erro ao buscar sessão: " . $e->getMessage());
+                }
+            }
+            
+            if (!$userId) {
+                error('Usuário não autenticado', 401);
+            }
+            
+            $stmt = $pdo->prepare("
+                SELECT rr.*, r.titulo, r.icone, r.categoria 
+                FROM resgate_recompensas rr 
+                JOIN recompensas r ON rr.recompensa_id = r.id 
+                WHERE rr.user_id = ? 
+                ORDER BY rr.created_at DESC
+            ");
+            $stmt->execute([$userId]);
+            $resgates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            success($resgates);
+        }
+        break;
+        
+    case (preg_match('/^\/recompensas\/resgate\/\d+\/status$/', $path) ? $path : false):
+        if ($method === 'PUT') {
+            $id = basename(dirname($path));
+            $input = json_decode(file_get_contents('php://input'), true);
+            
+            if (empty($input['status'])) {
+                error('Status é obrigatório', 422);
+            }
+            
+            $statusValidos = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE'];
+            if (!in_array($input['status'], $statusValidos)) {
+                error('Status inválido', 422);
+            }
+            
+            $stmt = $pdo->prepare("UPDATE resgate_recompensas SET status = ?, observacoes = ? WHERE id = ?");
+            $stmt->execute([$input['status'], $input['observacoes'] ?? null, $id]);
+            
+            $stmt = $pdo->prepare("SELECT * FROM resgate_recompensas WHERE id = ?");
+            $stmt->execute([$id]);
+            $resgate = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            success($resgate, 'Status atualizado com sucesso!');
         }
         break;
         

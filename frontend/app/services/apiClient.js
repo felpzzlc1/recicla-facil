@@ -95,6 +95,81 @@
         if (!lsGet('rf_session')) { 
           lsSet('rf_session', { logged: false, profile: null }); 
         }
+        
+        if (!lsGet('rf_recompensas')) {
+          lsSet('rf_recompensas', [
+            {
+              id: uid(),
+              titulo: 'Vale Compras R$ 50',
+              descricao: 'Vale compras no valor de R$ 50,00 para usar em estabelecimentos parceiros',
+              icone: '🛍️',
+              categoria: 'Compras',
+              categoria_icone: '✓',
+              pontos: 5000,
+              disponivel: 15,
+              ativo: true
+            },
+            {
+              id: uid(),
+              titulo: 'Café Grátis',
+              descricao: 'Café grátis em estabelecimentos parceiros',
+              icone: '☕',
+              categoria: 'Gastronomia',
+              categoria_icone: '☕',
+              pontos: 500,
+              disponivel: 50,
+              ativo: true
+            },
+            {
+              id: uid(),
+              titulo: 'Ingresso Cinema',
+              descricao: 'Ingresso para cinema em qualquer filme em cartaz',
+              icone: '🎬',
+              categoria: 'Entretenimento',
+              categoria_icone: '🎬',
+              pontos: 3000,
+              disponivel: 10,
+              ativo: true
+            },
+            {
+              id: uid(),
+              titulo: 'Kit Sustentável',
+              descricao: 'Kit com produtos sustentáveis e ecológicos',
+              icone: '🌱',
+              categoria: 'Eco',
+              categoria_icone: '🎁',
+              pontos: 2000,
+              disponivel: 25,
+              ativo: true
+            },
+            {
+              id: uid(),
+              titulo: 'Vale Compras R$ 100',
+              descricao: 'Vale compras no valor de R$ 100,00 para usar em estabelecimentos parceiros',
+              icone: '🛒',
+              categoria: 'Compras',
+              categoria_icone: '✓',
+              pontos: 10000,
+              disponivel: 8,
+              ativo: true
+            },
+            {
+              id: uid(),
+              titulo: 'Experiência Eco-Turismo',
+              descricao: 'Passeio ecológico em parque natural com guia especializado',
+              icone: '🏔️',
+              categoria: 'Turismo',
+              categoria_icone: '🧭',
+              pontos: 15000,
+              disponivel: 5,
+              ativo: true
+            }
+          ]);
+        }
+        
+        if (!lsGet('rf_resgates')) {
+          lsSet('rf_resgates', []);
+        }
       })();
 
       // Real HTTP client
@@ -273,6 +348,57 @@
           arr = arr.filter(function(x){ return x.id !== idd; });
           lsSet('rf_cronograma', arr); 
           return { success: true, data: { ok:true } };
+        }
+
+        // RECOMPENSAS
+        if(url === '/recompensas' && method === 'GET'){
+          var recompensas = lsGet('rf_recompensas', []);
+          return { success: true, data: recompensas };
+        }
+        if(url.startsWith('/recompensas/') && method === 'GET' && !url.includes('/resgatar')){
+          var id = url.split('/')[2];
+          var recompensas = lsGet('rf_recompensas', []);
+          var recompensa = recompensas.find(function(x){ return x.id === id; });
+          if(recompensa) return { success: true, data: recompensa };
+          throw { message: 'Recompensa não encontrada' };
+        }
+        if(url === '/recompensas/resgatar' && method === 'POST'){
+          var sess = lsGet('rf_session', { logged: false });
+          if(!sess.logged) throw { message: 'Não autenticado' };
+          
+          var recompensas = lsGet('rf_recompensas', []);
+          var recompensa = recompensas.find(function(x){ return x.id === data.recompensa_id; });
+          if(!recompensa) throw { message: 'Recompensa não encontrada' };
+          if(recompensa.disponivel <= 0) throw { message: 'Recompensa indisponível' };
+          
+          // Simular verificação de pontos (para mock, sempre permitir)
+          var resgate = {
+            id: uid(),
+            user_id: sess.user.id,
+            recompensa_id: recompensa.id,
+            pontos_gastos: recompensa.pontos,
+            status: 'PENDENTE',
+            data_resgate: new Date().toISOString(),
+            recompensa: recompensa
+          };
+          
+          var resgates = lsGet('rf_resgates', []);
+          resgates.push(resgate);
+          lsSet('rf_resgates', resgates);
+          
+          // Decrementar disponibilidade
+          recompensa.disponivel--;
+          lsSet('rf_recompensas', recompensas);
+          
+          return { success: true, data: resgate };
+        }
+        if(url === '/recompensas/meus-resgates' && method === 'GET'){
+          var sess = lsGet('rf_session', { logged: false });
+          if(!sess.logged) throw { message: 'Não autenticado' };
+          
+          var resgates = lsGet('rf_resgates', []);
+          var meusResgates = resgates.filter(function(x){ return x.user_id === sess.user.id; });
+          return { success: true, data: meusResgates };
         }
 
         throw { message: 'Rota mock não mapeada: ' + method + ' ' + url };

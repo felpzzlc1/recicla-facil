@@ -7,6 +7,7 @@ use App\Http\Controllers\CronogramaColetaController;
 use App\Http\Controllers\DoacaoController;
 use App\Http\Controllers\PontoColetaController;
 use App\Http\Controllers\PontuacaoController;
+use App\Http\Controllers\RecompensaController;
 use App\Http\Middleware\AuthMiddleware;
 
 // Rotas de autenticação
@@ -55,3 +56,10 @@ Route::get('/pontuacao/estatisticas-gerais', [PontuacaoController::class, 'obter
 Route::post('/pontuacao/simular-descarte', [PontuacaoController::class, 'simularDescarte'])->middleware(AuthMiddleware::class);
 Route::post('/pontuacao/registrar-descarte', [PontuacaoController::class, 'registrarDescarte'])->middleware(AuthMiddleware::class);
 Route::post('/pontuacao/resetar-semanais', [PontuacaoController::class, 'resetarPontosSemanais']);
+
+// Rotas de recompensas
+Route::get('/recompensas', [RecompensaController::class, 'index']);
+Route::get('/recompensas/{id}', [RecompensaController::class, 'show']);
+Route::post('/recompensas/resgatar', [RecompensaController::class, 'resgatar'])->middleware(AuthMiddleware::class);
+Route::get('/recompensas/meus-resgates', [RecompensaController::class, 'meusResgates'])->middleware(AuthMiddleware::class);
+Route::put('/recompensas/resgate/{id}/status', [RecompensaController::class, 'atualizarStatusResgate']);

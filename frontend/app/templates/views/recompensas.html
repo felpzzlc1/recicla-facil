@@ -2,7 +2,7 @@
   <div class="points-display-card">
     <div class="points-info">
       <span class="recycle-icon">♻️</span>
-      <span class="points-text">Você tem 8.350 pontos</span>
+      <span class="points-text">Você tem {{ vm.pontosUsuario | number }} pontos</span>
     </div>
   </div>
   
@@ -12,9 +12,27 @@
   </p>
 </div>
 
-<div class="rewards-grid">
+<!-- Loading state -->
+<div ng-if="vm.carregando" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Carregando recompensas...</p>
+</div>
+
+<!-- Error state -->
+<div ng-if="vm.erro" class="error-container">
+  <div class="error-message">
+    <span class="error-icon">⚠️</span>
+    <p>{{ vm.erro }}</p>
+    <button class="btn btn-primary" ng-click="vm.init()">Tentar Novamente</button>
+  </div>
+</div>
+
+<!-- Rewards grid -->
+<div ng-if="!vm.carregando && !vm.erro" class="rewards-grid">
   <div class="reward-card" ng-repeat="recompensa in vm.recompensas">
-    <div class="reward-availability">Disponível</div>
+    <div class="reward-availability" ng-class="{'unavailable': recompensa.disponivel <= 0}">
+      {{ recompensa.disponivel > 0 ? 'Disponível' : 'Indisponível' }}
+    </div>
     
     <div class="reward-icon">
       <div class="icon-container">{{ recompensa.icone }}</div>
@@ -22,19 +40,86 @@
     
     <div class="reward-content">
       <h3 class="reward-title">{{ recompensa.titulo }}</h3>
+      <p class="reward-description" ng-if="recompensa.descricao">{{ recompensa.descricao }}</p>
       <div class="reward-category">
-        <span class="category-icon">{{ recompensa.categoriaIcone }}</span>
+        <span class="category-icon">{{ recompensa.categoria_icone }}</span>
         <span class="category-text">{{ recompensa.categoria }}</span>
       </div>
       
       <div class="reward-details">
-        <div class="reward-points">{{ recompensa.pontos }} pts</div>
+        <div class="reward-points">{{ recompensa.pontos | number }} pts</div>
         <div class="reward-stock">{{ recompensa.disponivel }} disponíveis</div>
       </div>
     </div>
     
     <div class="reward-actions">
-      <button class="btn btn-primary">Resgatar</button>
+      <button 
+        class="btn" 
+        ng-class="vm.getBotaoClass(recompensa)"
+        ng-click="vm.resgatarRecompensa(recompensa)"
+        ng-disabled="!vm.podeResgatar(recompensa) || vm.resgatando">
+        {{ vm.getBotaoTexto(recompensa) }}
+      </button>
     </div>
+  </div>
+</div>
+
+<!-- Empty state -->
+<div ng-if="!vm.carregando && !vm.erro && vm.recompensas.length === 0" class="empty-state">
+  <div class="empty-icon">🎁</div>
+  <h3>Nenhuma recompensa disponível</h3>
+  <p>Volte em breve para novas recompensas!</p>
+</div>
+
+<!-- Modal de Confirmação -->
+<div ng-if="vm.mostrarModalConfirmacao" class="modal-overlay" ng-click="vm.cancelarResgate()">
+  <div class="modal-container" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Confirmar Resgate</h3>
+      <button class="modal-close" ng-click="vm.cancelarResgate()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="recompensa-preview">
+        <div class="recompensa-icon">{{ vm.recompensaSelecionada.icone }}</div>
+        <h4>{{ vm.recompensaSelecionada.titulo }}</h4>
+        <p class="recompensa-descricao">{{ vm.recompensaSelecionada.descricao }}</p>
+        <div class="recompensa-custo">
+          <span class="custo-label">Custo:</span>
+          <span class="custo-valor">{{ vm.recompensaSelecionada.pontos | number }} pontos</span>
+        </div>
+      </div>
+      
+      <div class="pontos-info">
+        <div class="pontos-atual">
+          <span class="label">Pontos atuais:</span>
+          <span class="valor">{{ vm.pontosUsuario | number }}</span>
+        </div>
+        <div class="pontos-apos">
+          <span class="label">Pontos após resgate:</span>
+          <span class="valor">{{ vm.pontosAposResgate | number }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" ng-click="vm.cancelarResgate()" ng-disabled="vm.resgatando">
+        Cancelar
+      </button>
+      <button class="btn btn-primary" ng-click="vm.confirmarResgate()" ng-disabled="vm.resgatando">
+        <span ng-if="!vm.resgatando">Confirmar Resgate</span>
+        <span ng-if="vm.resgatando">Processando...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Notificação Toast -->
+<div ng-if="vm.mostrarNotificacao" class="toast-notification" ng-class="'toast-' + vm.tipoNotificacao">
+  <div class="toast-content">
+    <span class="toast-icon" ng-if="vm.tipoNotificacao === 'success'">✓</span>
+    <span class="toast-icon" ng-if="vm.tipoNotificacao === 'error'">⚠</span>
+    <span class="toast-message">{{ vm.mensagemNotificacao }}</span>
+    <button class="toast-close" ng-click="vm.fecharNotificacao()">×</button>
   </div>
 </div>

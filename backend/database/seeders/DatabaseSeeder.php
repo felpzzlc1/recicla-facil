@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             PontoColetaSeeder::class,
             CronogramaColetaSeeder::class,
             PontuacaoSeeder::class,
+            RecompensaSeeder::class,
         ]);
     }
 }
