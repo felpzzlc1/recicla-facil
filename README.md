@@ -142,10 +142,6 @@ O sistema inclui as seguintes entidades principais:
 - **Conquistas:** Sistema de badges
 - **Doacoes:** Registro de doações
 
-## Licença
-
-> TODO: Definir licença do projeto.
-
 ## Créditos
 
 Sistema desenvolvido para promoção da sustentabilidade e gestão eficiente de resíduos recicláveis.
