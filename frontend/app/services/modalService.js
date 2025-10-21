@@ -16,7 +16,6 @@
         },
         
         openModal: function(mode) {
-          console.log('ModalService: Abrindo modal:', mode);
           modalState.isLogin = mode === 'login';
           modalState.showModal = true;
           modalState.error = '';
@@ -26,7 +25,6 @@
         },
         
         closeModal: function() {
-          console.log('ModalService: Fechando modal');
           modalState.showModal = false;
           modalState.error = '';
           modalState.success = '';

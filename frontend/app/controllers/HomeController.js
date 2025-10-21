@@ -6,7 +6,6 @@
       vm.metrics = { coletasAbertas: 0, coletasConcluidas: 0, doacoesAtivas: 0, doacoesEntregues: 0, pontos: 0 };
 
       ColetaService.list().then(function(items){
-        console.log('Coletas recebidas:', items);
         if (Array.isArray(items)) {
           vm.metrics.coletasAbertas = items.filter(function(i){ return i.status === 'ABERTA'; }).length;
           vm.metrics.coletasConcluidas = items.filter(function(i){ return i.status === 'CONCLUIDA'; }).length;
@@ -21,7 +20,6 @@
       });
 
       DoacaoService.list().then(function(items){
-        console.log('Doações recebidas:', items);
         if (Array.isArray(items)) {
           vm.metrics.doacoesAtivas = items.filter(function(i){ return !i.entregue; }).length;
           vm.metrics.doacoesEntregues = items.filter(function(i){ return !!i.entregue; }).length;
@@ -36,7 +34,6 @@
       });
 
       PontoColetaService.list().then(function(items){
-        console.log('Pontos recebidos:', items);
         if (Array.isArray(items)) {
           vm.metrics.pontos = items.length;
         } else {

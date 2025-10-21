@@ -5,21 +5,27 @@
       var profileCache = null;
       var currentUser = null;
 
-      function getProfile(){
-        if(profileCache){ return angular.copy(profileCache); }
+      function getProfile() {
+        if (profileCache) { 
+          return angular.copy(profileCache); 
+        }
+        
         try {
-          // try to read from local session
           var sess = JSON.parse(localStorage.getItem('rf_session') || 'null');
-          console.log('Carregando perfil da sessão:', sess);
-          if(sess && sess.profile && sess.token){ 
+          if (sess && sess.profile && sess.token) { 
             profileCache = sess.profile;
             currentUser = sess.user;
-            console.log('Perfil carregado:', profileCache);
           }
-        } catch(e){
+        } catch(e) {
           console.error('Erro ao carregar perfil:', e);
         }
-        return angular.copy(profileCache || { nome:'', email:'', telefone:'', pontuacao: 0 });
+        
+        return angular.copy(profileCache || { 
+          nome: '', 
+          email: '', 
+          telefone: '', 
+          pontuacao: 0 
+        });
       }
 
       function saveSession(user, profile) {
@@ -27,7 +33,6 @@
         localStorage.setItem('rf_session', JSON.stringify(session));
         profileCache = profile;
         currentUser = user;
-        console.log('Sessão salva no localStorage:', session);
       }
       
       // Inicializar sessão ao carregar a aplicação
@@ -37,11 +42,6 @@
           if (sess && sess.user && sess.profile && sess.token) {
             profileCache = sess.profile;
             currentUser = sess.user;
-            console.log('Sessão inicializada:', {
-              user: currentUser,
-              profile: profileCache,
-              token: sess.token
-            });
           }
         } catch(e) {
           console.error('Erro ao inicializar sessão:', e);
@@ -59,10 +59,8 @@
 
       return {
         register: function(userData) {
-          console.log('AuthService.register chamado com:', userData);
           return ApiClient.request('POST', '/auth/register', userData)
             .then(function(response) {
-              console.log('Resposta do servidor:', response);
               if (response.success) {
                 saveSession(response.data, response.data);
                 return response.data;
@@ -74,27 +72,23 @@
               throw error;
             });
         },
-        login: function(email, senha){
+        login: function(email, senha) {
           var self = this;
-          return ApiClient.request('POST', '/auth/login', { email: email, senha: senha })
-            .then(function(response) {
-              console.log('Resposta do login:', response);
-              if (response.success) {
-                // Garantir que o token seja salvo
-                var userData = response.data;
-                if (!userData.token) {
-                  console.warn('Token não encontrado na resposta do login');
-                }
-                saveSession(userData, userData);
-                console.log('Sessão salva:', {
-                  user: userData,
-                  token: userData.token,
-                  loggedIn: self.isLoggedIn()
-                });
-                return userData;
+          return ApiClient.request('POST', '/auth/login', { 
+            email: email, 
+            senha: senha 
+          })
+          .then(function(response) {
+            if (response.success) {
+              var userData = response.data;
+              if (!userData.token) {
+                console.warn('Token não encontrado na resposta do login');
               }
-              throw new Error(response.message || 'Credenciais inválidas');
-            });
+              saveSession(userData, userData);
+              return userData;
+            }
+            throw new Error(response.message || 'Credenciais inválidas');
+          });
         },
         getProfile: getProfile,
         getCurrentUser: function() {
@@ -134,14 +128,6 @@
             hasSession = !!(session && session.user && session.token);
           } catch(e) {}
           
-          console.log('Verificação de login:', {
-            hasUser: hasUser,
-            hasToken: hasToken,
-            hasSession: hasSession,
-            currentUser: currentUser,
-            token: this.getToken()
-          });
-          
           return hasUser && hasToken && hasSession;
         },
         getToken: function() {
@@ -160,16 +146,10 @@
             if (sess && sess.user && sess.profile && sess.token) {
               profileCache = sess.profile;
               currentUser = sess.user;
-              console.log('Status de login atualizado:', {
-                loggedIn: true,
-                user: currentUser,
-                token: sess.token
-              });
               return true;
             } else {
               profileCache = null;
               currentUser = null;
-              console.log('Usuário não logado');
               return false;
             }
           } catch(e) {

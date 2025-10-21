@@ -8,7 +8,6 @@
 
       function load(){
         DoacaoService.list().then(function(items){ 
-          console.log('Doações carregadas:', items);
           vm.items = Array.isArray(items) ? items : [];
         }).catch(function(err) {
           console.error('Erro ao carregar doações:', err);

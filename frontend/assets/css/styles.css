@@ -213,10 +213,6 @@ main {
   grid-template-columns: repeat(3, 1fr);
 }
 
-.grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
 /* Formulários */
 .form-group {
   margin-bottom: 20px;
@@ -289,38 +285,6 @@ main {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.list-item {
-  padding: 16px 0;
-  border-bottom: 1px solid #F0F0F0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.list-item:last-child {
-  border-bottom: none;
-}
-
-/* KPI e estatísticas */
-.kpi {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 0;
-}
-
-.kpi-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--primary-green);
-}
-
-.kpi-label {
-  font-size: 14px;
-  color: var(--gray);
-  font-weight: 500;
 }
 
 /* Footer */

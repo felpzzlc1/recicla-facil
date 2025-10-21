@@ -7,11 +7,7 @@
       return {
         // Listar todos os cronogramas (sempre usa mock)
         list: function() {
-          console.log('CronogramaService.list() chamado - usando mock forçado');
-          // Força o uso do mock apenas para cronogramas
           return ApiClient.request('GET', '/cronograma', null, null, true).then(function(response) {
-            console.log('Resposta do CronogramaService.list():', response);
-            // Retorna diretamente o array de dados
             return response.success ? response.data : [];
           });
         },
@@ -65,9 +61,7 @@
         
         // Criar novo cronograma (sempre usa mock)
         criar: function(dados) {
-          console.log('CronogramaService.criar() chamado - usando mock forçado');
           return ApiClient.request('POST', '/cronograma', dados, null, true).then(function(response) {
-            console.log('Resposta do CronogramaService.criar():', response);
             return response.success ? response.data : response;
           });
         },

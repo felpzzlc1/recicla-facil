@@ -9,7 +9,6 @@
 
       // Função para abrir o modal
       vm.openModal = function(mode) {
-        console.log('AuthModalController: Abrindo modal:', mode);
         ModalService.openModal(mode);
       };
 
@@ -32,7 +31,6 @@
 
         AuthService.login(vm.modalState.form.email, vm.modalState.form.senha)
           .then(function(response) {
-            console.log('Login realizado com sucesso:', response);
             ModalService.closeModal();
             $location.path('/');
           })
@@ -44,7 +42,6 @@
 
       // Função de cadastro
       vm.register = function() {
-        console.log('Tentando cadastrar usuário...', vm.modalState.form);
         
         if (!vm.modalState.form.nome || !vm.modalState.form.email || !vm.modalState.form.telefone || !vm.modalState.form.senha) {
           ModalService.setError('Todos os campos são obrigatórios');
@@ -68,11 +65,8 @@
           senha: vm.modalState.form.senha
         };
 
-        console.log('Dados do usuário:', userData);
-
         AuthService.register(userData)
           .then(function(response) {
-            console.log('Cadastro realizado com sucesso:', response);
             ModalService.setSuccess('Cadastro realizado com sucesso! Agora você pode fazer login.');
             // Após 2 segundos, alternar para login
             setTimeout(function() {

@@ -6,22 +6,47 @@
       var USE_MOCK = !!APP_CONFIG.USE_MOCK;
 
       // LocalStorage helpers
-      function lsGet(key, def){ try { return JSON.parse(localStorage.getItem(key)) || def; } catch(e){ return def; } }
-      function lsSet(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
-      function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+      function lsGet(key, def) { 
+        try { 
+          return JSON.parse(localStorage.getItem(key)) || def; 
+        } catch(e) { 
+          return def; 
+        } 
+      }
+      
+      function lsSet(key, val) { 
+        localStorage.setItem(key, JSON.stringify(val)); 
+      }
+      
+      function uid() { 
+        return Math.random().toString(36).slice(2) + Date.now().toString(36); 
+      }
 
       // Initialize mock "tables" if empty
-      (function bootstrap(){
-        if(!lsGet('rf_users')){
-          lsSet('rf_users', [{ id: 'u1', email: 'demo@recicla.com', senha: '123', nome: 'Usuário Demo', telefone: '' }]);
+      (function bootstrap() {
+        if (!lsGet('rf_users')) {
+          lsSet('rf_users', [{ 
+            id: 'u1', 
+            email: 'demo@recicla.com', 
+            senha: '123', 
+            nome: 'Usuário Demo', 
+            telefone: '' 
+          }]);
         }
-        if(!lsGet('rf_coletas')){ lsSet('rf_coletas', []); }
-        if(!lsGet('rf_doacoes')){ lsSet('rf_doacoes', []); }
-        if(!lsGet('rf_pontos')){
+        
+        if (!lsGet('rf_coletas')) { 
+          lsSet('rf_coletas', []); 
+        }
+        
+        if (!lsGet('rf_doacoes')) { 
+          lsSet('rf_doacoes', []); 
+        }
+        
+        if (!lsGet('rf_pontos')) {
           lsSet('rf_pontos', [
-            { id: uid(), nome:'Eco Ponto Centro', tipo:'Público', endereco:'Praça Central, 100 - Centro' },
-            { id: uid(), nome:'Cooperativa Verde', tipo:'Cooperativa', endereco:'Av. Brasil, 2450 - Industrial' },
-            { id: uid(), nome:'Mercado Bom Preço', tipo:'Privado', endereco:'Rua das Flores, 77 - Jardim' }
+            { id: uid(), nome: 'Eco Ponto Centro', tipo: 'Público', endereco: 'Praça Central, 100 - Centro' },
+            { id: uid(), nome: 'Cooperativa Verde', tipo: 'Cooperativa', endereco: 'Av. Brasil, 2450 - Industrial' },
+            { id: uid(), nome: 'Mercado Bom Preço', tipo: 'Privado', endereco: 'Rua das Flores, 77 - Jardim' }
           ]);
         }
         // Limpar dados antigos e criar novos com formato correto
@@ -66,7 +91,10 @@
             ativo: true
           }
         ]);
-        if(!lsGet('rf_session')){ lsSet('rf_session', { logged: false, profile: null }); }
+        
+        if (!lsGet('rf_session')) { 
+          lsSet('rf_session', { logged: false, profile: null }); 
+        }
       })();
 
       // Real HTTP client
@@ -102,12 +130,10 @@
 
       // Mock client backed by localStorage
       function mockRequest(method, url, data){
-        console.log('mockRequest chamado:', method, url, data);
         var defer = $q.defer();
         setTimeout(function(){
           try {
             var result = handleMock(method, url, data);
-            console.log('handleMock retornou:', result);
             defer.resolve(result);
           } catch(err){
             console.error('Erro no handleMock:', err);
@@ -219,24 +245,19 @@
 
         // CRONOGRAMA
         if(url === '/cronograma' && method === 'GET'){
-          console.log('Mock GET /cronograma chamado');
           var cronogramas = lsGet('rf_cronograma', []);
-          console.log('Mock GET /cronograma retornando:', cronogramas);
           return { success: true, data: cronogramas };
         }
         if(url === '/cronograma' && method === 'POST'){
-          console.log('Mock POST /cronograma chamado com dados:', data);
           var list = lsGet('rf_cronograma', []);
           var item = angular.extend({ 
             id: uid(), 
             criadoEm: new Date().toISOString(),
-            // Garantir que os horários sejam strings
             horario_inicio: data.horario_inicio || '08:00',
             horario_fim: data.horario_fim || '12:00'
           }, data);
           list.push(item); 
           lsSet('rf_cronograma', list); 
-          console.log('Mock POST /cronograma retornando:', { success: true, data: item });
           return { success: true, data: item };
         }
         if(url.startsWith('/cronograma/') && method === 'PUT'){
@@ -260,7 +281,6 @@
       return {
         request: function(method, url, data, token, forceMock){
           var useMock = forceMock || USE_MOCK;
-          console.log('ApiClient.request() - USE_MOCK:', useMock, 'URL:', url);
           return useMock ? mockRequest(method, url, data) : httpRequest(method, url, data, token);
         }
       };

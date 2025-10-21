@@ -29,7 +29,6 @@
       };
 
       vm.register = function() {
-        console.log('Tentando cadastrar usuário...', vm.form);
         
         if (!vm.form.nome || !vm.form.email || !vm.form.telefone || !vm.form.senha) {
           vm.error = 'Todos os campos são obrigatórios';
@@ -53,11 +52,8 @@
           senha: vm.form.senha
         };
 
-        console.log('Dados do usuário:', userData);
-
         AuthService.register(userData)
           .then(function(response){
-            console.log('Cadastro realizado com sucesso:', response);
             // Limpar o formulário
             vm.form = { nome: '', email: '', telefone: '', senha: '', confirmarSenha: '' };
             vm.error = '';

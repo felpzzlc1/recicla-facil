@@ -47,7 +47,6 @@
               latitude: position.coords.latitude,
               longitude: position.coords.longitude
             };
-            console.log('Localização obtida:', vm.userLocation);
             vm.loadNearbyPoints();
           },
           function(error) {
@@ -60,7 +59,6 @@
               latitude: -23.5505,
               longitude: -46.6333
             };
-            console.log('Usando coordenadas de fallback:', vm.userLocation);
             vm.loadNearbyPoints();
           },
           {
@@ -81,7 +79,6 @@
         } else {
           // Carrega todos os pontos se não há localização
           PontoColetaService.list().then(function(response) {
-            console.log('Pontos carregados:', response);
             vm.pontos = response.pontos || [];
             vm.loading = false;
           }).catch(function(err) {
@@ -100,10 +97,8 @@
         }
         
         vm.searchTimeout = setTimeout(function() {
-          console.log('Buscando pontos próximos para:', vm.userLocation);
           
           if (!vm.userLocation || !vm.userLocation.latitude || !vm.userLocation.longitude) {
-            console.error('Localização não disponível:', vm.userLocation);
             vm.error = 'Localização não disponível.';
             vm.loading = false;
             return;
@@ -116,7 +111,6 @@
             50, // raio de 50km
             20  // limite de 20 pontos
           ).then(function(response) {
-            console.log('Pontos próximos encontrados:', response);
             
             if (response.pontos && response.pontos.length > 0) {
               vm.pontos = response.pontos;
@@ -138,7 +132,6 @@
       // Função para selecionar um ponto
       vm.selectPoint = function(ponto) {
         vm.selectedPoint = ponto;
-        console.log('Ponto selecionado:', ponto);
         
         // Aqui você pode implementar ações como:
         // - Abrir mapa com direções
@@ -210,11 +203,8 @@
           })
         };
         
-        console.log('Enviando dados:', dadosEnvio);
-        
         // Enviar para API
         PontoColetaService.cadastrar(dadosEnvio).then(function(response) {
-          console.log('Ponto cadastrado:', response);
           vm.mostrarMensagem('Ponto de coleta cadastrado com sucesso!', 'sucesso');
           
           // Recarregar pontos após sucesso
