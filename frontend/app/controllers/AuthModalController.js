@@ -35,7 +35,6 @@
             console.log('Login realizado com sucesso:', response);
             ModalService.closeModal();
             $location.path('/');
-            $scope.$apply();
           })
           .catch(function(err) {
             console.error('Erro no login:', err);
@@ -92,7 +91,6 @@
         AuthService.logout();
         ModalService.closeModal();
         $location.path('/');
-        $scope.$apply();
       };
 
       // Verificar se usuário está logado

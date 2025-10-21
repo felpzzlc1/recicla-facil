@@ -3,9 +3,30 @@
   <p class="page-subtitle">
     Fique por dentro dos dias e horários de coleta seletiva no seu bairro. Ative notificações para não perder nenhuma coleta!
   </p>
+  <div class="action-buttons">
+    <button class="btn btn-primary" ng-click="vm.abrirModalCadastro()">
+      <span>➕</span>
+      Adicionar Cronograma
+    </button>
+  </div>
 </div>
 
-<div class="schedule-list">
+<!-- Loading e Error States -->
+<div ng-if="vm.loading" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Carregando cronograma de coleta...</p>
+</div>
+
+<div ng-if="vm.error && !vm.loading" class="error-container">
+  <div class="error-icon">⚠️</div>
+  <p class="error-message">{{ vm.error }}</p>
+  <button class="btn btn-primary" ng-click="vm.getUserLocation()">
+    Tentar Novamente
+  </button>
+</div>
+
+<!-- Lista de cronogramas -->
+<div ng-if="!vm.loading && !vm.error" class="schedule-list">
   <div class="schedule-card" ng-repeat="coleta in vm.coletas">
     <div class="schedule-date">
       <div class="date-square">
@@ -30,6 +51,14 @@
           <span class="detail-icon">📍</span>
           <span class="detail-text">{{ coleta.localizacao }}</span>
         </div>
+        <div class="detail-item" ng-if="coleta.endereco">
+          <span class="detail-icon">🏠</span>
+          <span class="detail-text">{{ coleta.endereco }}</span>
+        </div>
+        <div class="detail-item" ng-if="coleta.observacoes">
+          <span class="detail-icon">📝</span>
+          <span class="detail-text">{{ coleta.observacoes }}</span>
+        </div>
       </div>
     </div>
     
@@ -38,6 +67,143 @@
         <span>🔔</span>
         Lembrar-me
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cadastro -->
+<div class="modal-overlay" ng-if="vm.showModal" ng-click="vm.fecharModal()">
+  <div class="modal-container" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📅 Cadastrar Cronograma de Coleta</h3>
+      <button class="close-btn" ng-click="vm.fecharModal()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <form ng-submit="vm.cadastrarCronograma()" class="cadastro-form-modal">
+        <!-- Informações Básicas -->
+        <div class="form-section">
+          <div class="form-group">
+            <label for="material">Material *</label>
+            <select id="material" ng-model="vm.formData.material" required>
+              <option value="">Selecione o material</option>
+              <option ng-repeat="material in vm.materiaisDisponiveis" value="{{ material }}">
+                {{ material }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="dia_semana">Dia da Semana *</label>
+            <select id="dia_semana" ng-model="vm.formData.dia_semana" required>
+              <option value="">Selecione o dia</option>
+              <option ng-repeat="dia in vm.diasSemana" value="{{ dia }}">
+                {{ dia }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="horario_inicio">Horário de Início *</label>
+              <input type="time" id="horario_inicio" ng-model="vm.formData.horario_inicio" required>
+            </div>
+
+            <div class="form-group">
+              <label for="horario_fim">Horário de Fim *</label>
+              <input type="time" id="horario_fim" ng-model="vm.formData.horario_fim" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Localização -->
+        <div class="form-section">
+          <label class="section-label">📍 Localização</label>
+          
+          <div class="form-group">
+            <label for="endereco">Endereço Completo *</label>
+            <textarea id="endereco" ng-model="vm.formData.endereco" required 
+                      placeholder="Rua, número, bairro, cidade - Estado"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bairro">Bairro *</label>
+              <input type="text" id="bairro" ng-model="vm.formData.bairro" required 
+                     placeholder="Nome do bairro">
+            </div>
+
+            <div class="form-group">
+              <label for="cidade">Cidade *</label>
+              <input type="text" id="cidade" ng-model="vm.formData.cidade" required 
+                     placeholder="Nome da cidade">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="estado">Estado *</label>
+              <input type="text" id="estado" ng-model="vm.formData.estado" required 
+                     placeholder="Estado (UF)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Coordenadas (Opcional) -->
+        <div class="form-section">
+          <label class="section-label">📍 Coordenadas (Opcional)</label>
+          <p class="form-help">Se você souber as coordenadas exatas, pode preenchê-las. Caso contrário, deixe em branco.</p>
+          <div class="location-controls">
+            <button type="button" class="btn btn-secondary" ng-click="vm.obterLocalizacaoAtual()">
+              <span>📍</span>
+              Usar Minha Localização
+            </button>
+            <span class="location-status" ng-if="vm.localizacaoObtida">
+              ✅ Localização obtida
+            </span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="latitude">Latitude (opcional)</label>
+              <input type="number" id="latitude" ng-model="vm.formData.latitude" 
+                     step="0.000001" placeholder="-23.5505">
+            </div>
+
+            <div class="form-group">
+              <label for="longitude">Longitude (opcional)</label>
+              <input type="number" id="longitude" ng-model="vm.formData.longitude" 
+                     step="0.000001" placeholder="-46.6333">
+            </div>
+          </div>
+        </div>
+
+        <!-- Observações -->
+        <div class="form-section">
+          <div class="form-group">
+            <label for="observacoes">Observações</label>
+            <textarea id="observacoes" ng-model="vm.formData.observacoes" 
+                      placeholder="Informações adicionais sobre a coleta..."></textarea>
+          </div>
+        </div>
+
+        <!-- Mensagens -->
+        <div ng-if="vm.mensagem" class="mensagem" ng-class="vm.mensagemTipo">
+          {{ vm.mensagem }}
+        </div>
+
+        <!-- Botões -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" ng-click="vm.fecharModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" ng-disabled="vm.salvando">
+            <span ng-if="vm.salvando">💾</span>
+            <span ng-if="!vm.salvando">✅</span>
+            {{ vm.salvando ? 'Salvando...' : 'Cadastrar' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

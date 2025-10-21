@@ -81,15 +81,37 @@ class Pontuacao extends Model
      */
     public function adicionarPontos($pontos, $motivo = 'descarte')
     {
+        $hoje = now()->startOfDay();
+        $ultimaAtualizacao = $this->ultima_atualizacao ? $this->ultima_atualizacao->startOfDay() : null;
+        
+        // Verificar se precisa resetar pontos semanais (nova semana)
+        $inicioSemana = now()->startOfWeek();
+        if (!$this->ultima_atualizacao || $this->ultima_atualizacao->startOfWeek()->lt($inicioSemana)) {
+            $this->pontos_semana_atual = 0;
+        }
+        
+        // Verificar sequência de dias
+        if ($ultimaAtualizacao) {
+            $diferencaDias = $hoje->diffInDays($ultimaAtualizacao);
+            
+            if ($diferencaDias == 0) {
+                // Mesmo dia - não incrementar sequência
+            } elseif ($diferencaDias == 1) {
+                // Dia seguinte - incrementar sequência
+                $this->sequencia_dias += 1;
+            } else {
+                // Mais de 1 dia de diferença - resetar sequência
+                $this->sequencia_dias = 1;
+            }
+        } else {
+            // Primeira vez - iniciar sequência
+            $this->sequencia_dias = 1;
+        }
+        
         $this->pontos += $pontos;
         $this->total_pontos_ganhos += $pontos;
         $this->pontos_semana_atual += $pontos;
-        
-        // Atualizar estatísticas baseadas no motivo
-        if ($motivo === 'descarte') {
-            $this->descartes += 1;
-            $this->sequencia_dias = max($this->sequencia_dias, 1);
-        }
+        $this->descartes += 1;
         
         // Recalcular nível
         $nivelInfo = $this->calcularNivel($this->pontos);
@@ -107,7 +129,8 @@ class Pontuacao extends Model
      */
     public function verificarConquistas()
     {
-        $conquistas = [
+        // Usar as conquistas definidas no repository para evitar duplicação
+        $conquistasDisponiveis = [
             ['nome' => 'Iniciante', 'icone' => '🌱', 'requisito' => 100, 'tipo' => 'pontos'],
             ['nome' => 'Reciclador', 'icone' => '♻️', 'requisito' => 500, 'tipo' => 'pontos'],
             ['nome' => 'Eco Warrior', 'icone' => '☀️', 'requisito' => 1000, 'tipo' => 'pontos'],
@@ -120,7 +143,7 @@ class Pontuacao extends Model
 
         $novasConquistas = [];
         
-        foreach ($conquistas as $conquista) {
+        foreach ($conquistasDisponiveis as $conquista) {
             $jaConquistada = $this->conquistas()
                 ->where('nome', $conquista['nome'])
                 ->exists();
@@ -139,6 +162,10 @@ class Pontuacao extends Model
                         'icone' => $conquista['icone'],
                         'desbloqueada_em' => now()
                     ]);
+                    
+                    // Atualizar contador de badges
+                    $this->badges_conquistadas += 1;
+                    $this->save();
                     
                     $novasConquistas[] = $conquista;
                 }

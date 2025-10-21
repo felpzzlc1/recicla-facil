@@ -24,6 +24,48 @@
             { id: uid(), nome:'Mercado Bom Preço', tipo:'Privado', endereco:'Rua das Flores, 77 - Jardim' }
           ]);
         }
+        // Limpar dados antigos e criar novos com formato correto
+        lsSet('rf_cronograma', [
+          {
+            id: uid(),
+            material: 'Papel',
+            dia_semana: 'Segunda-feira',
+            horario_inicio: '08:00',
+            horario_fim: '12:00',
+            endereco: 'Rua das Flores, 123',
+            bairro: 'Centro',
+            cidade: 'São Paulo',
+            estado: 'SP',
+            observacoes: 'Coleta de papel reciclável',
+            ativo: true
+          },
+          {
+            id: uid(),
+            material: 'Plástico',
+            dia_semana: 'Terça-feira',
+            horario_inicio: '14:00',
+            horario_fim: '18:00',
+            endereco: 'Av. Brasil, 456',
+            bairro: 'Jardins',
+            cidade: 'São Paulo',
+            estado: 'SP',
+            observacoes: 'Coleta de plástico reciclável',
+            ativo: true
+          },
+          {
+            id: uid(),
+            material: 'Metal',
+            dia_semana: 'Quarta-feira',
+            horario_inicio: '09:00',
+            horario_fim: '13:00',
+            endereco: 'Rua da Consolação, 789',
+            bairro: 'Consolação',
+            cidade: 'São Paulo',
+            estado: 'SP',
+            observacoes: 'Coleta de metal reciclável',
+            ativo: true
+          }
+        ]);
         if(!lsGet('rf_session')){ lsSet('rf_session', { logged: false, profile: null }); }
       })();
 
@@ -32,9 +74,15 @@
         var cfg = { 
           method: method, 
           url: APP_CONFIG.API_BASE_URL + url, 
-          data: data,
           headers: {}
         };
+        
+        // Para GET, usar params; para POST/PUT, usar data
+        if (method === 'GET' && data) {
+          cfg.params = data;
+        } else if (data) {
+          cfg.data = data;
+        }
         
         // Adicionar token de autenticação se disponível
         if (token) {
@@ -54,12 +102,15 @@
 
       // Mock client backed by localStorage
       function mockRequest(method, url, data){
+        console.log('mockRequest chamado:', method, url, data);
         var defer = $q.defer();
         setTimeout(function(){
           try {
             var result = handleMock(method, url, data);
+            console.log('handleMock retornou:', result);
             defer.resolve(result);
           } catch(err){
+            console.error('Erro no handleMock:', err);
             defer.reject(err);
           }
         }, 200);
@@ -75,17 +126,21 @@
           var newUser = { id: uid(), email: data.email, senha: data.senha, nome: data.nome, telefone: data.telefone, pontuacao: 0 };
           users.push(newUser);
           lsSet('rf_users', users);
-          var session = { logged: true, user: newUser, profile: { id:newUser.id, email:newUser.email, nome:newUser.nome, telefone:newUser.telefone, pontuacao: newUser.pontuacao } };
+          var token = 'mock_token_' + uid();
+          var userWithToken = angular.extend({}, newUser, { token: token });
+          var session = { logged: true, user: userWithToken, profile: { id:newUser.id, email:newUser.email, nome:newUser.nome, telefone:newUser.telefone, pontuacao: newUser.pontuacao }, token: token };
           lsSet('rf_session', session);
-          return { success: true, data: session.profile };
+          return { success: true, data: angular.extend({}, session.profile, { token: token }) };
         }
         if(url === '/auth/login' && method === 'POST'){
           var users = lsGet('rf_users', []);
           var u = users.find(function(x){ return x.email === data.email && x.senha === data.senha; });
           if(!u) throw { message: 'Credenciais inválidas' };
-          var session = { logged: true, user: u, profile: { id:u.id, email:u.email, nome:u.nome, telefone:u.telefone, pontuacao: u.pontuacao } };
+          var token = 'mock_token_' + uid();
+          var userWithToken = angular.extend({}, u, { token: token });
+          var session = { logged: true, user: userWithToken, profile: { id:u.id, email:u.email, nome:u.nome, telefone:u.telefone, pontuacao: u.pontuacao }, token: token };
           lsSet('rf_session', session);
-          return { success: true, data: session.profile };
+          return { success: true, data: angular.extend({}, session.profile, { token: token }) };
         }
         if(url === '/auth/profile' && method === 'GET'){
           var s = lsGet('rf_session', { logged:false });
@@ -162,12 +217,51 @@
           return { success: true, data: lsGet('rf_pontos', []) };
         }
 
+        // CRONOGRAMA
+        if(url === '/cronograma' && method === 'GET'){
+          console.log('Mock GET /cronograma chamado');
+          var cronogramas = lsGet('rf_cronograma', []);
+          console.log('Mock GET /cronograma retornando:', cronogramas);
+          return { success: true, data: cronogramas };
+        }
+        if(url === '/cronograma' && method === 'POST'){
+          console.log('Mock POST /cronograma chamado com dados:', data);
+          var list = lsGet('rf_cronograma', []);
+          var item = angular.extend({ 
+            id: uid(), 
+            criadoEm: new Date().toISOString(),
+            // Garantir que os horários sejam strings
+            horario_inicio: data.horario_inicio || '08:00',
+            horario_fim: data.horario_fim || '12:00'
+          }, data);
+          list.push(item); 
+          lsSet('rf_cronograma', list); 
+          console.log('Mock POST /cronograma retornando:', { success: true, data: item });
+          return { success: true, data: item };
+        }
+        if(url.startsWith('/cronograma/') && method === 'PUT'){
+          var id = url.split('/')[2];
+          var items = lsGet('rf_cronograma', []);
+          var i = items.findIndex(function(x){ return x.id === id; });
+          if(i >= 0){ items[i] = angular.extend({}, items[i], data); lsSet('rf_cronograma', items); return { success: true, data: items[i] }; }
+          throw { message: 'Cronograma não encontrado' };
+        }
+        if(url.startsWith('/cronograma/') && method === 'DELETE'){
+          var idd = url.split('/')[2];
+          var arr = lsGet('rf_cronograma', []);
+          arr = arr.filter(function(x){ return x.id !== idd; });
+          lsSet('rf_cronograma', arr); 
+          return { success: true, data: { ok:true } };
+        }
+
         throw { message: 'Rota mock não mapeada: ' + method + ' ' + url };
       }
 
       return {
-        request: function(method, url, data, token){
-          return USE_MOCK ? mockRequest(method, url, data) : httpRequest(method, url, data, token);
+        request: function(method, url, data, token, forceMock){
+          var useMock = forceMock || USE_MOCK;
+          console.log('ApiClient.request() - USE_MOCK:', useMock, 'URL:', url);
+          return useMock ? mockRequest(method, url, data) : httpRequest(method, url, data, token);
         }
       };
     }]);

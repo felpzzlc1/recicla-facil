@@ -28,8 +28,8 @@ services:
       dockerfile: Dockerfile
     image: recicla-facil-backend
     container_name: recicla_facil_backend
-    expose:
-      - "80"
+    ports:
+      - "9161:80"
     environment:
       - APP_ENV=local
       - DB_CONNECTION=mysql

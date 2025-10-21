@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recicla Fácil</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/osm-styles.css" />
+  <link rel="stylesheet" href="assets/css/pontuacao.css" />
   <!-- AngularJS (1.x) via CDN -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-route.min.js"></script>
@@ -13,7 +15,7 @@
   <!-- Simple App Config available globally (edit as needed) -->
   <script>
     window.APP_CONFIG = {
-      API_BASE_URL: "http://localhost:9160/api",
+      API_BASE_URL: "http://localhost:9161/api",
       USE_MOCK: false
     };
   </script>
@@ -23,12 +25,13 @@
   <script src="app/app.routes.js"></script>
 
   <!-- Services -->
-  <script src="app/services/apiClient.js"></script>
+  <script src="app/services/ApiClient.js"></script>
   <script src="app/services/authService.js"></script>
   <script src="app/services/modalService.js"></script>
   <script src="app/services/coletaService.js"></script>
   <script src="app/services/doacaoService.js"></script>
   <script src="app/services/pontoColetaService.js"></script>
+  <script src="app/services/cronogramaService.js"></script>
 
   <!-- Controllers -->
   <script src="app/controllers/HomeController.js"></script>

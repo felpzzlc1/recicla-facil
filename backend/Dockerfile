@@ -5,16 +5,20 @@ RUN set -eux; \
       bash \
       curl \
       mariadb-connector-c-dev \
-      nginx; \
+      nginx \
+      composer; \
     docker-php-ext-install \
       pdo \
-      pdo_mysql; \
+      pdo_mysql \
+      session; \
     rm -rf /var/cache/apk/*
 
 WORKDIR /var/www/html
 
 # Copy application source
 COPY . /var/www/html
+
+# Composer dependencies will be installed manually if needed
 
 # Basic php.ini adjustments
 RUN echo "date.timezone=UTC" > /usr/local/etc/php/conf.d/99-recicla.ini \

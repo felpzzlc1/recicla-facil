@@ -1,21 +1,60 @@
 <div class="page-header">
-  <h1 class="page-title">Pontos de Coleta Próximos</h1>
+  <h1 class="page-title">Pontos de Coleta</h1>
   <p class="page-subtitle">
-    Encontre os pontos de coleta seletiva mais próximos de você. Cada local aceita diferentes tipos de materiais recicláveis.
+    Encontre os pontos de coleta seletiva disponíveis. Cada local aceita diferentes tipos de materiais recicláveis.
   </p>
 </div>
 
-<div class="collection-points-grid">
-  <div class="collection-point-card" ng-repeat="p in vm.pontos">
-    <div class="card-header">
-      <h3 class="point-name">{{ p.nome }}</h3>
-      <div class="location-icon">📍</div>
+<!-- Loading e Error States -->
+<div ng-if="vm.loading" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Carregando pontos de coleta...</p>
+</div>
+
+<div ng-if="vm.error && !vm.loading" class="error-container">
+  <div class="error-icon">⚠️</div>
+  <p class="error-message">{{ vm.error }}</p>
+  <button class="btn btn-primary" ng-click="vm.getUserLocation()">
+    Tentar Novamente
+  </button>
+</div>
+
+<!-- Localização do usuário -->
+  <div ng-if="vm.userLocation && !vm.loading" class="location-info">
+    <div class="location-badge">
+      <span class="location-icon">📍</span>
+      <span ng-if="vm.cidade">Mostrando pontos em {{ vm.cidade }}</span>
+      <span ng-if="!vm.cidade">Localização detectada - Buscando pontos próximos</span>
     </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" ng-click="vm.abrirModalCadastro()">
+        <span>➕</span>
+        Cadastrar Ponto
+      </button>
+    </div>
+  </div>
+
+<!-- Grid de pontos de coleta -->
+<div ng-if="!vm.loading && !vm.error" class="collection-points-grid">
+  <div class="collection-point-card" 
+       ng-repeat="p in vm.pontos" 
+       ng-class="{'selected': vm.selectedPoint && vm.selectedPoint.id === p.id}"
+       ng-click="vm.selectPoint(p)">
+    
+            <div class="card-header">
+              <h3 class="point-name">{{ p.nome }}</h3>
+              <div class="point-badges">
+                <span ng-if="p.fonte === 'OpenStreetMap'" class="point-source osm">OSM</span>
+                <span ng-if="p.tipo_origem === 'exemplo'" class="badge badge-orange">Exemplo</span>
+                <span ng-if="p.tipo" class="badge badge-blue">{{ p.tipo }}</span>
+                <span class="location-icon">📍</span>
+              </div>
+            </div>
     
     <div class="point-info">
       <div class="info-item">
         <span class="info-icon">📍</span>
-        <span class="info-text">{{ p.distancia || '0.5 km' }}</span>
+        <span class="info-text">{{ p.distancia || 'Distância não disponível' }}</span>
       </div>
       <div class="info-item">
         <span class="info-icon">🏠</span>
@@ -23,26 +62,190 @@
       </div>
       <div class="info-item">
         <span class="info-icon">🕒</span>
-        <span class="info-text">{{ p.horario || 'Seg-Sex: 8h-18h | Sáb: 8h-12h' }}</span>
+        <span class="info-text">{{ p.horario || 'Horário não informado' }}</span>
       </div>
       <div class="info-item">
         <span class="info-icon">📞</span>
-        <span class="info-text">{{ p.telefone || '(11) 1234-5678' }}</span>
+        <span class="info-text">{{ p.telefone || 'Telefone não informado' }}</span>
       </div>
     </div>
     
     <div class="accepted-materials">
-      <span class="material-tag badge-blue" ng-repeat="material in p.materiais">Papel</span>
-      <span class="material-tag badge-red">Plástico</span>
-      <span class="material-tag badge-yellow">Metal</span>
-      <span class="material-tag badge-green">Vidro</span>
+      <span class="material-tag" 
+            ng-repeat="material in p.materiais" 
+            ng-class="{
+              'badge-blue': material === 'Papel',
+              'badge-red': material === 'Plástico', 
+              'badge-yellow': material === 'Metal',
+              'badge-green': material === 'Vidro'
+            }">
+        {{ material }}
+      </span>
     </div>
     
     <div class="card-actions">
-      <button class="btn btn-primary">
-        <span>✈️</span>
-        Como Chegar
+      <button class="btn btn-secondary" 
+              ng-click="vm.selectPoint(p); $event.stopPropagation()">
+        <span>⭐</span>
+        Selecionar
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mensagem quando não há pontos -->
+<div ng-if="!vm.loading && !vm.error && vm.pontos.length === 0" class="no-points">
+  <div class="no-points-icon">🗺️</div>
+  <h3>Nenhum ponto encontrado</h3>
+  <p>Não foram encontrados pontos de coleta próximos à sua localização.</p>
+  <button class="btn btn-primary" ng-click="vm.getUserLocation()">
+    Buscar Novamente
+  </button>
+</div>
+
+<!-- Ponto selecionado - detalhes -->
+<div ng-if="vm.selectedPoint" class="selected-point-details">
+  <div class="details-card">
+    <div class="details-header">
+      <h3>Ponto Selecionado: {{ vm.selectedPoint.nome }}</h3>
+      <button class="close-details" ng-click="vm.selectedPoint = null">✕</button>
+    </div>
+    <div class="details-content">
+      <p><strong>Endereço:</strong> {{ vm.selectedPoint.endereco }}</p>
+      <p><strong>Telefone:</strong> {{ vm.selectedPoint.telefone }}</p>
+      <p><strong>Horário:</strong> {{ vm.selectedPoint.horario }}</p>
+      <p><strong>Distância:</strong> {{ vm.selectedPoint.distancia }}</p>
+      <p><strong>Materiais aceitos:</strong> {{ vm.selectedPoint.materiais.join(', ') }}</p>
+    </div>
+    <div class="details-actions">
+      <button class="btn btn-secondary" ng-click="vm.selectedPoint = null">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cadastro -->
+<div class="modal-overlay" ng-if="vm.showModal" ng-click="vm.fecharModal()">
+  <div class="modal-container" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🗺️ Cadastrar Ponto de Coleta</h3>
+      <button class="close-btn" ng-click="vm.fecharModal()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <form ng-submit="vm.cadastrarPonto()" class="cadastro-form-modal">
+        <!-- Informações Básicas -->
+        <div class="form-section">
+          <div class="form-group">
+            <label for="nome">Nome do Ponto *</label>
+            <input type="text" id="nome" ng-model="vm.formData.nome" required 
+                   placeholder="Ex: Cooperativa Recicla Vida">
+          </div>
+
+          <div class="form-group">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" ng-model="vm.formData.tipo">
+              <option value="Cooperativa">Cooperativa</option>
+              <option value="Ponto Verde">Ponto Verde</option>
+              <option value="Ecoponto">Ecoponto</option>
+              <option value="Centro de Triagem">Centro de Triagem</option>
+              <option value="ONG">ONG</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="endereco">Endereço Completo *</label>
+            <textarea id="endereco" ng-model="vm.formData.endereco" required 
+                      placeholder="Rua, número, bairro, cidade - Estado"></textarea>
+          </div>
+        </div>
+
+        <!-- Localização (Opcional) -->
+        <div class="form-section">
+          <label class="section-label">📍 Localização (Opcional)</label>
+          <p class="form-help">Se você souber as coordenadas exatas, pode preenchê-las. Caso contrário, deixe em branco.</p>
+          <div class="location-controls">
+            <button type="button" class="btn btn-secondary" ng-click="vm.obterLocalizacaoAtual()">
+              <span>📍</span>
+              Usar Minha Localização
+            </button>
+            <span class="location-status" ng-if="vm.localizacaoObtida">
+              ✅ Localização obtida
+            </span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="latitude">Latitude (opcional)</label>
+              <input type="number" id="latitude" ng-model="vm.formData.latitude" 
+                     step="0.000001" placeholder="-23.5505">
+            </div>
+
+            <div class="form-group">
+              <label for="longitude">Longitude (opcional)</label>
+              <input type="number" id="longitude" ng-model="vm.formData.longitude" 
+                     step="0.000001" placeholder="-46.6333">
+            </div>
+          </div>
+        </div>
+
+        <!-- Contato -->
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input type="tel" id="telefone" ng-model="vm.formData.telefone" 
+                     placeholder="(11) 99999-9999">
+            </div>
+
+            <div class="form-group">
+              <label for="horario">Horário</label>
+              <input type="text" id="horario" ng-model="vm.formData.horario" 
+                     placeholder="Ex: Seg-Sex: 8h-18h">
+            </div>
+          </div>
+        </div>
+
+        <!-- Materiais Aceitos -->
+        <div class="form-section">
+          <label class="section-label">♻️ Materiais Aceitos</label>
+          <div class="materiais-grid">
+            <label class="material-checkbox" ng-repeat="material in vm.materiaisDisponiveis">
+              <input type="checkbox" ng-model="vm.formData.materiais[material]" 
+                     ng-true-value="true" ng-false-value="false">
+              <span class="material-tag" ng-class="{
+                'badge-blue': material === 'Papel',
+                'badge-red': material === 'Plástico', 
+                'badge-yellow': material === 'Metal',
+                'badge-green': material === 'Vidro',
+                'badge-brown': material === 'Orgânico',
+                'badge-purple': material === 'Eletrônicos'
+              }">
+                {{ material }}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mensagens -->
+        <div ng-if="vm.mensagem" class="mensagem" ng-class="vm.mensagemTipo">
+          {{ vm.mensagem }}
+        </div>
+
+        <!-- Botões -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" ng-click="vm.fecharModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" ng-disabled="vm.salvando">
+            <span ng-if="vm.salvando">💾</span>
+            <span ng-if="!vm.salvando">✅</span>
+            {{ vm.salvando ? 'Salvando...' : 'Cadastrar' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

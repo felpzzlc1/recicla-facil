@@ -1,54 +1,109 @@
 <div class="page-header">
-  <h1 class="page-title">Sua Jornada de Reciclagem</h1>
-  <p class="page-subtitle">
-    Acompanhe seus pontos, conquiste badges e veja como você se compara com outros recicladores da sua região!
-  </p>
+  <div class="header-content">
+    <div class="header-text">
+      <h1 class="page-title">🌱 Sua Jornada de Reciclagem</h1>
+      <p class="page-subtitle">
+        Acompanhe seus pontos, conquiste badges e veja como você se compara com outros recicladores da sua região!
+      </p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-info">
+          <div class="stat-number">{{ pontuacaoCtrl.ranking.length || 0 }}</div>
+          <div class="stat-label">Posição no Ranking</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="gamification-grid">
+<!-- Loading State -->
+<div ng-if="pontuacaoCtrl.carregando" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Carregando suas estatísticas...</p>
+</div>
+
+<!-- Error State -->
+<div ng-if="pontuacaoCtrl.erro && !pontuacaoCtrl.carregando" class="error-container">
+  <div class="error-message">
+    <span class="error-icon">⚠️</span>
+    <p>{{ pontuacaoCtrl.erro }}</p>
+    <div class="debug-info" style="margin: 16px 0; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 0.875rem;">
+      <strong>Debug Info:</strong><br>
+      Logado: {{ AuthService.isLoggedIn() }}<br>
+      Token: {{ AuthService.getToken() ? 'Presente' : 'Ausente' }}<br>
+      Usuário: {{ AuthService.getCurrentUser() ? AuthService.getCurrentUser().nome : 'Nenhum' }}
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button class="btn btn-primary" ng-click="pontuacaoCtrl.carregarEstatisticas()">
+        Tentar Novamente
+      </button>
+      <button class="btn btn-secondary" ng-click="pontuacaoCtrl.verificarLogin()" ng-if="!AuthService.isLoggedIn()">
+        Fazer Login
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div ng-if="!pontuacaoCtrl.carregando && !pontuacaoCtrl.erro" class="gamification-grid">
   <div class="points-card">
     <div class="card-header">
-      <h3 class="card-title">Seus Pontos</h3>
+      <div class="header-left">
+        <h3 class="card-title">🎯 Seus Pontos</h3>
+        <div class="level-badge">
+          <span class="level-emoji">{{ pontuacaoCtrl.obterEmojiNivel() }}</span>
+          <span class="level-text">{{ pontuacaoCtrl.nivelNome }}</span>
+        </div>
+      </div>
+      <button class="btn btn-success btn-simular" ng-click="pontuacaoCtrl.abrirModalDescarte()" 
+              ng-if="pontuacaoCtrl.verificarLogin()">
+        <span class="btn-icon">♻️</span>
+        Simular Descarte
+      </button>
     </div>
     
     <div class="points-display">
-      <div class="current-points">8.350</div>
-      <div class="points-increase">
+      <div class="current-points">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontos || 0) }}</div>
+      <div class="points-increase" ng-if="pontuacaoCtrl.aumentoSemanal > 0">
         <span class="increase-icon">↗</span>
-        <span class="increase-text">+250 esta semana</span>
+        <span class="increase-text">+{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.aumentoSemanal || 0) }} esta semana</span>
       </div>
     </div>
     
     <div class="level-progress">
       <div class="level-info">
-        <span class="level-text">Nível 12 - Reciclador Expert</span>
-        <div class="trophy-icon">🏆</div>
+        <span class="level-text">Nível {{ pontuacaoCtrl.nivel }} - {{ pontuacaoCtrl.nivelNome }}</span>
+        <div class="trophy-icon">{{ pontuacaoCtrl.obterEmojiNivel() }}</div>
       </div>
       
       <div class="progress-container">
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 83.5%"></div>
+          <div class="progress-fill" ng-style="{'width': pontuacaoCtrl.progressoNivel + '%', 'background-color': pontuacaoCtrl.obterCorNivel()}"></div>
         </div>
-        <div class="progress-text">8350 / 10000</div>
+        <div class="progress-text">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontos || 0) }} / {{ pontuacaoCtrl.formatarNumero((pontuacaoCtrl.pontos || 0) + (pontuacaoCtrl.pontosRestantes || 0)) }}</div>
       </div>
       
-      <div class="next-level">Faltam 1650 pontos para o próximo nível!</div>
+      <div class="next-level" ng-if="pontuacaoCtrl.pontosRestantes > 0">
+        Faltam {{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontosRestantes || 0) }} pontos para o próximo nível!
+      </div>
     </div>
     
     <div class="stats-grid">
       <div class="stat-item">
         <div class="stat-icon">🎯</div>
-        <div class="stat-number">156</div>
+        <div class="stat-number">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.estatisticas.descartes || 0) }}</div>
         <div class="stat-label">Descartes</div>
       </div>
       <div class="stat-item">
         <div class="stat-icon">⚡</div>
-        <div class="stat-number">23</div>
+        <div class="stat-number">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.estatisticas.sequencia || 0) }}</div>
         <div class="stat-label">Sequência (dias)</div>
       </div>
       <div class="stat-item">
         <div class="stat-icon">🏅</div>
-        <div class="stat-number">5</div>
+        <div class="stat-number">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.estatisticas.badges || 0) }}</div>
         <div class="stat-label">Badges</div>
       </div>
     </div>
@@ -57,51 +112,90 @@
   <div class="achievements-card">
     <div class="card-header">
       <div class="achievements-title">
-        <span class="star-icon">⭐</span>
+        <span class="star-icon">🏆</span>
         <h3 class="card-title">Conquistas</h3>
+        <div class="achievements-count">
+          {{ pontuacaoCtrl.getConquistasDesbloqueadas() }} / {{ pontuacaoCtrl.conquistas.length || 0 }}
+        </div>
       </div>
     </div>
     
     <div class="achievements-list">
-      <div class="achievement unlocked">
-        <div class="achievement-icon">🌱</div>
+      <div ng-repeat="conquista in pontuacaoCtrl.conquistas" 
+           class="achievement" 
+           ng-class="{'unlocked': conquista.desbloqueada, 'locked': !conquista.desbloqueada}">
+        <div class="achievement-icon">{{ conquista.icone }}</div>
         <div class="achievement-content">
-          <div class="achievement-name">Iniciante</div>
+          <div class="achievement-name">{{ conquista.nome }}</div>
+          <div class="achievement-description">{{ conquista.descricao }}</div>
+          <div class="achievement-progress" ng-if="!conquista.desbloqueada">
+            <div class="progress-bar-small">
+              <div class="progress-fill-small" ng-style="{'width': conquista.progresso + '%'}"></div>
+            </div>
+            <span class="progress-text-small">{{ conquista.progresso.toFixed(0) }}%</span>
+          </div>
         </div>
-        <div class="achievement-badge">✓</div>
+        <div class="achievement-badge">
+          <span ng-if="conquista.desbloqueada">✓</span>
+          <span ng-if="!conquista.desbloqueada">🔒</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Simulação de Descarte -->
+<div ng-if="pontuacaoCtrl.mostrarModalDescarte" class="modal-overlay" ng-click="pontuacaoCtrl.fecharModalDescarte()">
+  <div class="modal-content" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Simular Descarte</h3>
+      <button class="modal-close" ng-click="pontuacaoCtrl.fecharModalDescarte()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Material:</label>
+        <select ng-model="pontuacaoCtrl.materialSelecionado" 
+                ng-change="pontuacaoCtrl.calcularPontos()"
+                class="form-control">
+          <option ng-repeat="material in pontuacaoCtrl.materiais" 
+                  value="{{ material.codigo }}">
+            {{ material.icone }} {{ material.nome }} ({{ material.pontosPorKg }} pts/kg)
+          </option>
+        </select>
       </div>
       
-      <div class="achievement unlocked">
-        <div class="achievement-icon">♻️</div>
-        <div class="achievement-content">
-          <div class="achievement-name">Reciclador</div>
-        </div>
-        <div class="achievement-badge">✓</div>
+      <div class="form-group">
+        <label>Peso (kg):</label>
+        <input type="number" 
+               ng-model="pontuacaoCtrl.pesoDescarte" 
+               ng-change="pontuacaoCtrl.calcularPontos()"
+               min="0.1" 
+               max="100" 
+               step="0.1"
+               class="form-control">
       </div>
       
-      <div class="achievement unlocked">
-        <div class="achievement-icon">☀️</div>
-        <div class="achievement-content">
-          <div class="achievement-name">Eco Warrior</div>
+      <div class="points-preview" ng-if="pontuacaoCtrl.pontosCalculados > 0">
+        <div class="points-preview-content">
+          <span class="points-preview-icon">🎯</span>
+          <span class="points-preview-text">
+            Você ganhará <strong>{{ pontuacaoCtrl.pontosCalculados }} pontos</strong>
+          </span>
         </div>
-        <div class="achievement-badge">✓</div>
       </div>
-      
-      <div class="achievement locked">
-        <div class="achievement-icon">🌳</div>
-        <div class="achievement-content">
-          <div class="achievement-name">Guardião Verde</div>
-        </div>
-        <div class="achievement-badge">🔒</div>
-      </div>
-      
-      <div class="achievement locked">
-        <div class="achievement-icon">🏆</div>
-        <div class="achievement-content">
-          <div class="achievement-name">Mestre Sustentável</div>
-        </div>
-        <div class="achievement-badge">🔒</div>
-      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" ng-click="pontuacaoCtrl.fecharModalDescarte()">
+        Cancelar
+      </button>
+      <button class="btn btn-success" 
+              ng-click="pontuacaoCtrl.simularDescarte()"
+              ng-disabled="!pontuacaoCtrl.materialSelecionado || !pontuacaoCtrl.pesoDescarte || pontuacaoCtrl.pesoDescarte <= 0">
+        <span ng-if="!pontuacaoCtrl.carregando">Confirmar Descarte</span>
+        <span ng-if="pontuacaoCtrl.carregando">Processando...</span>
+      </button>
     </div>
   </div>
 </div>

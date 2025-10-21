@@ -149,7 +149,7 @@ class PontuacaoController extends Controller
             $pontos = round($peso * $pontosPorKg);
             $motivo = "Descarte de {$material} ({$peso}kg)";
 
-            $resultado = $this->pontuacaoRepository->adicionarPontos($userId, $pontos, 'descarte');
+            $resultado = $this->pontuacaoRepository->adicionarPontos($userId, $pontos, 'simular-descarte');
             
             $response = [
                 'pontos_ganhos' => $pontos,
