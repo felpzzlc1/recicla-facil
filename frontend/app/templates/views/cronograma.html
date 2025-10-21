@@ -1,23 +1,26 @@
 <div class="page-header">
-  <h1 class="page-title">Cronograma de Coleta</h1>
-  <p class="page-subtitle">
-    Fique por dentro dos dias e horários de coleta seletiva no seu bairro. Ative notificações para não perder nenhuma coleta!
-  </p>
-  <div class="action-buttons">
-    <button class="btn btn-primary" 
-            ng-class="{'disabled': !vm.isLoggedIn()}"
-            ng-disabled="!vm.isLoggedIn()"
-            ng-click="vm.isLoggedIn() ? vm.abrirModalCadastro() : vm.openLoginModal()">
-      <span>➕</span>
-      Adicionar Cronograma
-    </button>
+  <div class="page-header-content">
+    <div class="page-header-icon">📅</div>
+    <h1 class="page-title">Cronograma de Coleta</h1>
+    <p class="page-subtitle">
+      Fique por dentro dos dias e horários de coleta seletiva no seu bairro. Ative notificações para não perder nenhuma coleta!
+    </p>
+    <div class="action-buttons">
+      <button class="btn btn-primary" 
+              ng-class="{'disabled': !vm.isLoggedIn()}"
+              ng-disabled="!vm.isLoggedIn()"
+              ng-click="vm.isLoggedIn() ? vm.abrirModalCadastro() : vm.openLoginModal()">
+        <span>➕</span>
+        Adicionar Cronograma
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- Loading e Error States -->
 <div ng-if="vm.loading" class="loading-container">
   <div class="loading-spinner"></div>
-  <p>Carregando cronograma de coleta...</p>
+  <p class="loading-text">Carregando cronograma de coleta...</p>
 </div>
 
 <div ng-if="vm.error && !vm.loading" class="error-container">
@@ -64,21 +67,16 @@
         </div>
       </div>
     </div>
-    
-    <div class="schedule-actions">
-      <button class="btn btn-secondary">
-        <span>🔔</span>
-        Lembrar-me
-      </button>
-    </div>
   </div>
 </div>
 
 <!-- Modal de Cadastro -->
 <div class="modal-overlay" ng-if="vm.showModal" ng-click="vm.fecharModal()">
-  <div class="modal-container" ng-click="$event.stopPropagation()">
+  <div class="modal-container modal-cronograma" ng-click="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>📅 Cadastrar Cronograma de Coleta</h3>
+      <div class="modal-header-content">
+        <h3>Cadastrar Cronograma de Coleta</h3>
+      </div>
       <button class="close-btn" ng-click="vm.fecharModal()">✕</button>
     </div>
     
@@ -121,7 +119,7 @@
 
         <!-- Localização -->
         <div class="form-section">
-          <label class="section-label">📍 Localização</label>
+          <label class="section-label">Localização</label>
           
           <div class="form-group">
             <label for="endereco">Endereço Completo *</label>
@@ -154,15 +152,14 @@
 
         <!-- Coordenadas (Opcional) -->
         <div class="form-section">
-          <label class="section-label">📍 Coordenadas (Opcional)</label>
+          <label class="section-label">Coordenadas (Opcional)</label>
           <p class="form-help">Se você souber as coordenadas exatas, pode preenchê-las. Caso contrário, deixe em branco.</p>
           <div class="location-controls">
             <button type="button" class="btn btn-secondary" ng-click="vm.obterLocalizacaoAtual()">
-              <span>📍</span>
               Usar Minha Localização
             </button>
             <span class="location-status" ng-if="vm.localizacaoObtida">
-              ✅ Localização obtida
+              Localização obtida
             </span>
           </div>
 
@@ -201,8 +198,6 @@
             Cancelar
           </button>
           <button type="submit" class="btn btn-primary" ng-disabled="vm.salvando">
-            <span ng-if="vm.salvando">💾</span>
-            <span ng-if="!vm.salvando">✅</span>
             {{ vm.salvando ? 'Salvando...' : 'Cadastrar' }}
           </button>
         </div>

@@ -16,47 +16,71 @@
           <span>📍</span>
           Encontrar Pontos de Coleta
         </a>
-        <a href="#!/como-funciona" class="btn btn-secondary">Como Funciona</a>
+        <button ng-click="vm.mostrarComoFunciona()" class="btn btn-secondary">Como Funciona</button>
       </div>
       
-      <div class="hero-stats">
-        <div class="stat-item">
-          <div class="stat-number">2.5k+</div>
-          <div class="stat-label">Usuários Ativos</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">150+</div>
-          <div class="stat-label">Pontos de Coleta</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">1M+</div>
-          <div class="stat-label">Kg Reciclados</div>
-        </div>
-      </div>
     </div>
     
     <div class="hero-right">
       <div class="hero-image">
-        <div class="bottles-container">
-          <div class="bottle bottle-1">🍼</div>
-          <div class="bottle bottle-2">🍼</div>
-          <div class="bottle bottle-3">🍼</div>
-          <div class="bottle bottle-4">🍼</div>
-          <div class="bottle bottle-5">🍼</div>
-          <div class="bottle bottle-6">🍼</div>
+        <div class="recycling-container">
+          <div class="recycling-item recycling-1">♻️</div>
+          <div class="recycling-item recycling-2">🌱</div>
+          <div class="recycling-item recycling-3">♻️</div>
+          <div class="recycling-item recycling-4">🌱</div>
+          <div class="recycling-item recycling-5">♻️</div>
+          <div class="recycling-item recycling-6">🌱</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Performance Card -->
-<div class="performance-card">
-  <div class="performance-content">
-    <div class="performance-icon">📈</div>
-    <div class="performance-text">
-      <div class="performance-title">Reciclagem este mês</div>
-      <div class="performance-value">+45%</div>
+
+<!-- Dialog Como Funciona -->
+<div class="modal-overlay" ng-if="vm.showModal" ng-click="vm.fecharModal()">
+  <div class="modal-container" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🌱 Como Funciona o Recicla Fácil</h3>
+      <button class="modal-close" ng-click="vm.fecharModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="como-funciona-content">
+        <div class="step">
+          <div class="step-icon">📍</div>
+          <div class="step-content">
+            <h4>1. Encontre Pontos de Coleta</h4>
+            <p>Descubra pontos de coleta seletiva próximos a você através do nosso mapa interativo.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">📅</div>
+          <div class="step-content">
+            <h4>2. Acompanhe o Cronograma</h4>
+            <p>Consulte os horários e dias de coleta para cada tipo de material na sua região.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">♻️</div>
+          <div class="step-content">
+            <h4>3. Recicle e Ganhe Pontos</h4>
+            <p>Descarte seus resíduos nos pontos corretos e acumule pontos a cada descarte realizado.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">🎁</div>
+          <div class="step-content">
+            <h4>4. Troque por Recompensas</h4>
+            <p>Use seus pontos para resgatar recompensas incríveis e incentivos sustentáveis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" ng-click="vm.fecharModal()">Entendi!</button>
     </div>
   </div>
 </div>

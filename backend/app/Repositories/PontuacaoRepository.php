@@ -213,16 +213,27 @@ class PontuacaoRepository
 
     public function obterEstatisticasGerais()
     {
-        $stmt = $this->pdo->query("SELECT COUNT(*) as total_usuarios, SUM(pontos) as total_pontos, SUM(descartes) as total_descartes FROM pontuacoes");
-        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        // Contar usuários ativos
+        $stmt = $this->pdo->query("SELECT COUNT(*) as usuarios_ativos FROM users");
+        $usuarios = $stmt->fetch(PDO::FETCH_OBJ);
 
-        $mediaPontos = $result->total_usuarios > 0 ? round($result->total_pontos / $result->total_usuarios, 2) : 0;
+        // Contar pontos de coleta
+        $stmt = $this->pdo->query("SELECT COUNT(*) as pontos_coleta FROM pontos_coleta WHERE ativo = 1");
+        $pontos = $stmt->fetch(PDO::FETCH_OBJ);
+
+        // Calcular kg reciclados (estimativa baseada em descartes)
+        $stmt = $this->pdo->query("SELECT SUM(descartes) as total_descartes FROM pontuacoes");
+        $descartes = $stmt->fetch(PDO::FETCH_OBJ);
+        $kgReciclados = $descartes->total_descartes * 2.5; // Estimativa: 2.5kg por descarte
+
+        // Calcular porcentagem de reciclagem (estimativa)
+        $porcentagemReciclagem = min(100, max(0, ($descartes->total_descartes / max(1, $usuarios->usuarios_ativos)) * 10));
 
         return [
-            'total_usuarios' => $result->total_usuarios,
-            'total_pontos' => $result->total_pontos,
-            'total_descartes' => $result->total_descartes,
-            'media_pontos' => $mediaPontos
+            'usuarios_ativos' => (int)$usuarios->usuarios_ativos,
+            'pontos_coleta' => (int)$pontos->pontos_coleta,
+            'kg_reciclados' => round($kgReciclados),
+            'porcentagem_reciclagem' => round($porcentagemReciclagem)
         ];
     }
 }

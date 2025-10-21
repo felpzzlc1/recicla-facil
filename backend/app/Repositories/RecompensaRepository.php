@@ -73,18 +73,41 @@ class RecompensaRepository
             // Decrementar disponibilidade da recompensa
             $recompensa->decrement('disponivel');
 
-            // Subtrair pontos do usuário
+            // Subtrair pontos do usuário e recalcular nível
+            $novosPontos = $pontosUsuario - $recompensa->pontos;
+            $novoNivel = $this->calcularNivel($novosPontos);
+            
             DB::table('pontuacoes')
                 ->where('user_id', $userId)
                 ->orderBy('created_at', 'desc')
                 ->limit(1)
                 ->update([
-                    'pontos_totais' => $pontosUsuario - $recompensa->pontos,
+                    'pontos' => $novosPontos,
+                    'pontos_totais' => $novosPontos,
+                    'nivel' => $novoNivel['nivel'],
+                    'nivel_nome' => $novoNivel['nome'],
                     'updated_at' => now()
                 ]);
 
             return $resgate;
         });
+    }
+
+    /**
+     * Calcular nível baseado nos pontos
+     */
+    private function calcularNivel($pontos)
+    {
+        if ($pontos < 100) return ['nivel' => 1, 'nome' => 'Iniciante'];
+        if ($pontos < 500) return ['nivel' => 2, 'nome' => 'Reciclador'];
+        if ($pontos < 1000) return ['nivel' => 3, 'nome' => 'Eco Warrior'];
+        if ($pontos < 2500) return ['nivel' => 4, 'nome' => 'Guardião Verde'];
+        if ($pontos < 5000) return ['nivel' => 5, 'nome' => 'Mestre Sustentável'];
+        if ($pontos < 10000) return ['nivel' => 6, 'nome' => 'Lenda Verde'];
+        if ($pontos < 25000) return ['nivel' => 7, 'nome' => 'Herói Ambiental'];
+        if ($pontos < 50000) return ['nivel' => 8, 'nome' => 'Defensor da Terra'];
+        if ($pontos < 100000) return ['nivel' => 9, 'nome' => 'Guardião Supremo'];
+        return ['nivel' => 10, 'nome' => 'Lenda Viva'];
     }
 
     public function getResgatesByUser($userId)

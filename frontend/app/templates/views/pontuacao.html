@@ -6,7 +6,7 @@
         Acompanhe seus pontos, conquiste badges e veja como você se compara com outros recicladores da sua região!
       </p>
     </div>
-    <div class="header-stats">
+    <div class="header-stats" ng-if="!pontuacaoCtrl.carregando && !pontuacaoCtrl.erro">
       <div class="stat-card">
         <div class="stat-icon">🏆</div>
         <div class="stat-info">
@@ -67,7 +67,7 @@
     <div class="points-display">
       <div class="current-points">{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.pontos || 0) }}</div>
       <div class="points-increase" ng-if="pontuacaoCtrl.aumentoSemanal > 0">
-        <span class="increase-icon">↗</span>
+        <span class="increase-icon">📈</span>
         <span class="increase-text">+{{ pontuacaoCtrl.formatarNumero(pontuacaoCtrl.aumentoSemanal || 0) }} esta semana</span>
       </div>
     </div>
@@ -146,9 +146,11 @@
 
 <!-- Modal de Simulação de Descarte -->
 <div ng-if="pontuacaoCtrl.mostrarModalDescarte" class="modal-overlay" ng-click="pontuacaoCtrl.fecharModalDescarte()">
-  <div class="modal-content" ng-click="$event.stopPropagation()">
+  <div class="modal-content modal-descarte" ng-click="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Registrar Descarte</h3>
+      <div class="modal-title">
+        <h3>Registrar Descarte</h3>
+      </div>
       <button class="modal-close" ng-click="pontuacaoCtrl.fecharModalDescarte()">×</button>
     </div>
     
