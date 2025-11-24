@@ -1,0 +1,136 @@
+.pontuacao-root {
+    -fx-background-color: linear-gradient(to bottom right, #f7f9fc, #edf1f7);
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.page-container {
+    -fx-alignment: TOP_LEFT;
+}
+
+.page-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2a44;
+}
+
+.page-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #4f5d75;
+}
+
+.card {
+    -fx-background-color: white;
+    -fx-padding: 24px;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 18, 0.2, 0, 8);
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1f2a44;
+}
+
+.primary-button {
+    -fx-background-color: linear-gradient(to right, #00b894, #00cec9);
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-padding: 10 24;
+    -fx-background-radius: 999px;
+}
+
+.primary-button:hover {
+    -fx-background-color: linear-gradient(to right, #00a884, #00bcb9);
+}
+
+.secondary-button {
+    -fx-background-color: rgba(52, 152, 219, 0.1);
+    -fx-text-fill: #2d3436;
+    -fx-padding: 10 24;
+    -fx-background-radius: 999px;
+}
+
+.points-highlight {
+    -fx-font-size: 48px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #0f172a;
+}
+
+.points-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #22c55e;
+}
+
+.level-badge {
+    -fx-background-color: rgba(99, 102, 241, 0.1);
+    -fx-text-fill: #6366f1;
+    -fx-padding: 6 12;
+    -fx-background-radius: 999px;
+    -fx-font-weight: 600;
+}
+
+.badge {
+    -fx-background-color: rgba(15, 23, 42, 0.05);
+    -fx-padding: 4 12;
+    -fx-background-radius: 999px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #475569;
+}
+
+.stats-grid .stat-item {
+    -fx-background-color: #f8fafc;
+    -fx-padding: 16;
+    -fx-background-radius: 12px;
+}
+
+.stat-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13px;
+}
+
+.stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.state-overlay {
+    -fx-background-color: rgba(15, 23, 42, 0.8);
+    -fx-text-fill: white;
+    -fx-padding: 32;
+}
+
+.state-title {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.modal-overlay {
+    -fx-background-color: rgba(15, 23, 42, 0.68);
+}
+
+.modal-card {
+    -fx-background-color: white;
+    -fx-padding: 24;
+    -fx-background-radius: 16px;
+    -fx-max-width: 420px;
+}
+
+.modal-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.modal-close {
+    -fx-background-color: transparent;
+    -fx-font-size: 18px;
+}
+
+.list-view {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+

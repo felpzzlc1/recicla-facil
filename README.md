@@ -18,7 +18,8 @@ O Recicla Fácil é uma aplicação web que facilita o processo de reciclagem ao
 
 | Diretório | Propósito | Tecnologia |
 |-----------|-----------|------------|
-| `frontend/` | Interface do usuário SPA | AngularJS 1.8.3 + Nginx |
+| `frontend/` | Interface web SPA legado | AngularJS 1.8.3 + Nginx |
+| `javafx-client/` | Cliente desktop para entrega acadêmica | Java 17 + JavaFX 21 |
 | `backend/` | API REST e lógica de negócio | Laravel + PHP 8.2 |
 | `database/` | Migrações e seeders | MySQL 8.0 |
 
@@ -31,12 +32,18 @@ O Recicla Fácil é uma aplicação web que facilita o processo de reciclagem ao
 - **Servidor:** Nginx + PHP-FPM
 - **Containerização:** Docker
 
-### Frontend
+### Frontend Web
 - **Framework:** AngularJS 1.8.3
 - **Servidor:** Nginx Alpine
 - **Roteamento:** Angular Route
 - **HTTP Client:** Angular $http
 - **Containerização:** Docker
+
+### Cliente Desktop (Entrega Faculdade)
+- **Framework:** JavaFX 21
+- **Build:** Maven
+- **HTTP Client:** java.net.http + Jackson
+- **Arquitetura:** MVVM simplificado (services + controllers)
 
 ### Infraestrutura
 - **Orquestração:** Docker Compose
@@ -68,6 +75,7 @@ docker ps
 ### Acessos
 - **Frontend:** http://localhost:9160
 - **API Backend:** http://localhost:9160/api/*
+- **Cliente JavaFX:** conecta em `http://localhost:9161/api` (configurável em `javafx-client/src/main/resources/app.properties`)
 - **Database:** localhost:33061
 
 ## Configuração de Ambiente (resumo, sem nomes/valores)
@@ -100,6 +108,15 @@ docker exec -it recicla_facil_backend bash
 # Acessar container do frontend
 docker exec -it recicla_facil_frontend sh
 ```
+
+## Executando o Cliente JavaFX
+
+```bash
+cd javafx-client
+mvn clean javafx:run
+```
+
+> Configure `auth.token` em `app.properties` se precisar injetar um token JWT durante a fase inicial, até que o fluxo de login desktop seja implementado.
 
 ## Scripts Úteis
 
