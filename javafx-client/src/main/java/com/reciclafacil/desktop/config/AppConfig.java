@@ -30,15 +30,27 @@ public final class AppConfig {
     }
 
     public String getApiBaseUrl() {
-        return require("api.baseUrl");
+        return getOverride("API_BASE_URL", "api.baseUrl");
     }
 
     public String getDefaultToken() {
-        return properties.getProperty("auth.token", "");
+        return getOverride("AUTH_TOKEN", "auth.token");
     }
 
     public String getLocale() {
         return properties.getProperty("ui.locale", "pt-BR");
+    }
+
+    private String getOverride(String envKey, String propertyKey) {
+        String envValue = System.getenv(envKey);
+        if (envValue != null && !envValue.isBlank()) {
+            return envValue.trim();
+        }
+        String sysProp = System.getProperty(envKey);
+        if (sysProp != null && !sysProp.isBlank()) {
+            return sysProp.trim();
+        }
+        return require(propertyKey);
     }
 
     private String require(String key) {

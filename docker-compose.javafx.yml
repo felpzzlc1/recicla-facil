@@ -1,0 +1,24 @@
+services:
+  javafx-client:
+    build:
+      context: ./javafx-client
+      dockerfile: Dockerfile
+    image: recicla-facil-javafx
+    container_name: recicla_facil_javafx
+    environment:
+      - DISPLAY=${DISPLAY}
+      - API_BASE_URL=${API_BASE_URL:-http://backend/api}
+      - AUTH_TOKEN=${AUTH_TOKEN:-}
+    volumes:
+      - ${X11_SOCKET:-/tmp/.X11-unix}:/tmp/.X11-unix:rw
+    depends_on:
+      - backend
+    networks:
+      - recicla_net
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    stdin_open: true
+    tty: true
+
