@@ -18,7 +18,8 @@ WORKDIR /var/www/html
 # Copy application source
 COPY . /var/www/html
 
-# Composer dependencies will be installed manually if needed
+# Note: Backend uses simple router in public/index.php, not full Laravel
+# Composer dependencies are optional and can be installed manually if needed
 
 # Basic php.ini adjustments
 RUN echo "date.timezone=UTC" > /usr/local/etc/php/conf.d/99-recicla.ini \
@@ -49,8 +50,9 @@ EXPOSE 80
 # Script para iniciar PHP-FPM, Nginx e inicializar banco
 RUN echo '#!/bin/sh' > /start.sh && \
     echo 'php-fpm -D' >> /start.sh && \
-    echo 'sleep 5' >> /start.sh && \
-    echo 'php /var/www/html/init-database.php' >> /start.sh && \
+    echo 'sleep 15' >> /start.sh && \
+    echo 'echo "Aguardando banco de dados..."' >> /start.sh && \
+    echo 'php /var/www/html/init-database.php || true' >> /start.sh && \
     echo 'nginx -g "daemon off;"' >> /start.sh && \
     chmod +x /start.sh
 

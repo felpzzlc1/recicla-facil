@@ -1,0 +1,68 @@
+.achievement-cell {
+    -fx-background-color: rgba(15, 23, 42, 0.02);
+    -fx-background-radius: 12px;
+}
+
+.achievement-icon {
+    -fx-font-size: 24px;
+}
+
+.achievement-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1f2a44;
+}
+
+.achievement-description {
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+}
+
+.achievement-status {
+    -fx-font-weight: 700;
+    -fx-text-fill: #22c55e;
+}
+
+.ranking-cell {
+    -fx-background-color: rgba(15, 23, 42, 0.02);
+    -fx-background-radius: 10px;
+}
+
+.ranking-position {
+    -fx-font-weight: 700;
+    -fx-text-fill: #94a3b8;
+}
+
+.ranking-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1e293b;
+}
+
+.ranking-points {
+    -fx-font-weight: 600;
+    -fx-text-fill: #0ea5e9;
+}
+
+.points-preview {
+    -fx-font-weight: 600;
+    -fx-text-fill: #16a34a;
+}
+
+.header-stats .stat-card-small {
+    -fx-background-color: white;
+    -fx-padding: 16;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.12), 12, 0.2, 0, 6);
+}
+
+.stat-card-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+}
+
+.stat-card-value {
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 700;
+    -fx-font-size: 20px;
+}
+

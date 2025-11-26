@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="rootPane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.reciclafacil.desktop.controller.PontuacaoViewController"
+           styleClass="pontuacao-root">
+    <children>
+        <VBox fx:id="contentContainer" spacing="24" padding="32.0" styleClass="page-container">
+            <children>
+                <HBox spacing="24" alignment="CENTER_LEFT">
+                    <children>
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="🌱 Sua Jornada de Reciclagem" styleClass="page-title"/>
+                                <Label text="Acompanhe seus pontos, conquiste badges e veja como você se compara!"
+                                       styleClass="page-subtitle"/>
+                            </children>
+                        </VBox>
+                        <HBox spacing="16" styleClass="header-stats">
+                            <children>
+                                <VBox styleClass="stat-card-small">
+                                    <Label text="Ranking Local" styleClass="stat-card-label"/>
+                                    <Label text="10" styleClass="stat-card-value"/>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <Button text="Registrar Descarte" onAction="#abrirModal" styleClass="primary-button"/>
+                    </children>
+                </HBox>
+
+                <GridPane hgap="24" vgap="24">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="60"/>
+                        <ColumnConstraints percentWidth="40"/>
+                    </columnConstraints>
+                    <children>
+                        <VBox spacing="16" styleClass="card">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label text="🎯 Seus Pontos" styleClass="card-title"/>
+                                    <Label fx:id="nivelNomeLabel" styleClass="level-badge"/>
+                                </HBox>
+                                <Label fx:id="pontosLabel" styleClass="points-highlight" text="0"/>
+                                <Label fx:id="aumentoSemanalLabel" text="+0 esta semana" styleClass="points-subtitle"/>
+                                <HBox spacing="12" alignment="CENTER_LEFT">
+                                    <Label fx:id="nivelLabel" styleClass="level-title" text="Nível 1"/>
+                                </HBox>
+                                <VBox spacing="8">
+                                    <ProgressBar fx:id="progressoNivelBar" progress="0.4" prefWidth="400"/>
+                                    <HBox alignment="CENTER_LEFT" spacing="8">
+                                        <Label fx:id="progressoNivelTexto" text="0 / 100"/>
+                                        <Label fx:id="faltamPontosLabel" text="Faltam 100 pontos" styleClass="badge"/>
+                                    </HBox>
+                                </VBox>
+                                <GridPane hgap="16" vgap="16" styleClass="stats-grid">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="33"/>
+                                        <ColumnConstraints percentWidth="33"/>
+                                        <ColumnConstraints percentWidth="33"/>
+                                    </columnConstraints>
+                                    <children>
+                                        <VBox spacing="4" styleClass="stat-item">
+                                            <Label text="Descartes" styleClass="stat-label"/>
+                                            <Label fx:id="descartesLabel" text="0" styleClass="stat-value"/>
+                                        </VBox>
+                                        <VBox spacing="4" styleClass="stat-item">
+                                            <Label text="Sequência (dias)" styleClass="stat-label"/>
+                                            <Label fx:id="sequenciaLabel" text="0" styleClass="stat-value"/>
+                                        </VBox>
+                                        <VBox spacing="4" styleClass="stat-item">
+                                            <Label text="Badges" styleClass="stat-label"/>
+                                            <Label fx:id="badgesLabel" text="0" styleClass="stat-value"/>
+                                        </VBox>
+                                    </children>
+                                </GridPane>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="16" styleClass="card">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label text="🏆 Conquistas" styleClass="card-title"/>
+                                    <Label fx:id="conquistasResumoLabel" text="0 / 0" styleClass="badge"/>
+                                </HBox>
+                                <ListView fx:id="conquistasListView" prefHeight="380"/>
+                            </children>
+                        </VBox>
+
+                        <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" spacing="16" styleClass="card">
+                            <children>
+                                <Label text="🏅 Ranking" styleClass="card-title"/>
+                                <ListView fx:id="rankingListView" prefHeight="320"/>
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+
+        <VBox fx:id="loadingState" alignment="CENTER" spacing="12" visible="false" styleClass="state-overlay">
+            <children>
+                <Label text="Carregando suas estatísticas..." styleClass="state-title"/>
+            </children>
+        </VBox>
+
+        <VBox fx:id="errorState" alignment="CENTER" spacing="12" visible="false" styleClass="state-overlay">
+            <children>
+                <Label text="⚠️" styleClass="state-icon"/>
+                <Label fx:id="errorMessageLabel" wrapText="true" styleClass="state-title"/>
+                <Button text="Tentar novamente" onAction="#tentarNovamente"/>
+            </children>
+        </VBox>
+
+        <StackPane fx:id="modalOverlay" visible="false" styleClass="modal-overlay">
+            <children>
+                <VBox spacing="16" styleClass="modal-card">
+                    <children>
+                        <HBox alignment="CENTER_RIGHT">
+                            <Button text="×" onAction="#fecharModal" styleClass="modal-close"/>
+                        </HBox>
+                        <Label text="Registrar Descarte" styleClass="modal-title"/>
+                        <VBox spacing="8">
+                            <Label text="Material"/>
+                            <TextField fx:id="materialField" promptText="papel, plastico..." onKeyReleased="#atualizarPontosPreview"/>
+                        </VBox>
+                        <VBox spacing="8">
+                            <Label text="Peso (kg)"/>
+                            <Spinner fx:id="pesoSpinner" editable="true"/>
+                        </VBox>
+                        <Label fx:id="pontosPreviewLabel" text="0 pontos" styleClass="points-preview"/>
+                        <HBox spacing="12">
+                            <Button text="Cancelar" onAction="#fecharModal" styleClass="secondary-button"/>
+                            <Button fx:id="registrarButton" text="Registrar" onAction="#registrarDescarte" styleClass="primary-button"/>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </children>
+</StackPane>
+
