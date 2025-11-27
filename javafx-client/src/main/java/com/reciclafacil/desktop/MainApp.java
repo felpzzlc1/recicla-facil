@@ -6,7 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 
@@ -16,19 +15,32 @@ import java.util.Locale;
 public class MainApp extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
-        Locale.setDefault(new Locale("pt", "BR"));
-        URL resource = getClass().getResource("/fxml/pontuacao-view.fxml");
-        if (resource == null) {
-            throw new IllegalStateException("FXML de pontuação não encontrado.");
+    public void start(Stage primaryStage) {
+        try {
+            Locale.setDefault(new Locale("pt", "BR"));
+            URL resource = getClass().getResource("/fxml/pontuacao-view.fxml");
+            if (resource == null) {
+                throw new IllegalStateException("FXML de pontuação não encontrado.");
+            }
+            Parent root = FXMLLoader.load(resource);
+            Scene scene = new Scene(root, 1280, 720);
+            URL baseCss = getClass().getResource("/styles/base.css");
+            if (baseCss != null) {
+                scene.getStylesheets().add(baseCss.toExternalForm());
+            }
+            URL pontuacaoCss = getClass().getResource("/styles/pontuacao.css");
+            if (pontuacaoCss != null) {
+                scene.getStylesheets().add(pontuacaoCss.toExternalForm());
+            }
+            primaryStage.setTitle("Recicla Fácil - Dashboard de Pontuação");
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Erro ao iniciar aplicação: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Falha ao iniciar aplicação", e);
         }
-        Parent root = FXMLLoader.load(resource);
-        Scene scene = new Scene(root, 1280, 720);
-        scene.getStylesheets().add(getClass().getResource("/styles/base.css").toExternalForm());
-        scene.getStylesheets().add(getClass().getResource("/styles/pontuacao.css").toExternalForm());
-        primaryStage.setTitle("Recicla Fácil - Dashboard de Pontuação");
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
     public static void main(String[] args) {

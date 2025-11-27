@@ -34,7 +34,17 @@ public final class AppConfig {
     }
 
     public String getDefaultToken() {
-        return getOverride("AUTH_TOKEN", "auth.token");
+        String envValue = System.getenv("AUTH_TOKEN");
+        if (envValue != null && !envValue.isBlank()) {
+            return envValue.trim();
+        }
+        String sysProp = System.getProperty("AUTH_TOKEN");
+        if (sysProp != null && !sysProp.isBlank()) {
+            return sysProp.trim();
+        }
+        // Token é opcional - pode ser vazio para permitir login posterior
+        String token = properties.getProperty("auth.token");
+        return (token != null) ? token.trim() : "";
     }
 
     public String getLocale() {

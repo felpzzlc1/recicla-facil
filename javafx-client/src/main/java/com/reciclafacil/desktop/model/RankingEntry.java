@@ -1,12 +1,14 @@
 package com.reciclafacil.desktop.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RankingEntry {
 
     private int posicao;
     private String nome;
+    @JsonProperty("pontuacao")
     private int pontos;
 
     public int getPosicao() {

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PontuacaoResumo {
 
-    private int pontos;
     private int nivel;
     @JsonProperty("nivel_nome")
     private String nivelNome;
@@ -23,14 +22,6 @@ public class PontuacaoResumo {
     private int sequenciaDias;
     @JsonProperty("badges_conquistadas")
     private int badgesConquistadas;
-
-    public int getPontos() {
-        return pontos;
-    }
-
-    public void setPontos(int pontos) {
-        this.pontos = pontos;
-    }
 
     public int getNivel() {
         return nivel;

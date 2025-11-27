@@ -22,6 +22,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -225,6 +226,11 @@ public class PontuacaoViewController {
         int pontos = calcularPontos(material, peso);
         pontosPreviewLabel.setText(pontos + " pontos");
         registrarButton.setDisable(pontos <= 0 || material == null || material.isBlank());
+    }
+
+    @FXML
+    private void atualizarPontosPreview(KeyEvent event) {
+        atualizarPontosPreview();
     }
 
     private int calcularPontos(String material, double peso) {
