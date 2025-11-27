@@ -1,42 +1,40 @@
-# Recicla Fácil
+# Recicla Fácil - Branch Main
 
-Sistema completo de gestão de reciclagem que conecta cidadãos, pontos de coleta e serviços de coleta domiciliar, promovendo a sustentabilidade através de uma plataforma gamificada com sistema de pontuação e recompensas.
+> **Frontend Web (AngularJS) + Backend Laravel**
 
-## Visão Geral
+Sistema completo de gestão de reciclagem desenvolvido como aplicação web, conectando cidadãos, pontos de coleta e serviços de coleta domiciliar através de uma interface web moderna e responsiva.
 
-O Recicla Fácil é uma aplicação web que facilita o processo de reciclagem ao conectar usuários com pontos de coleta próximos e permitir solicitações de coleta domiciliar. O sistema inclui funcionalidades de gamificação com pontuação por ações sustentáveis, cronograma de coletas, sistema de recompensas e conquistas, incentivando a participação ativa dos usuários na preservação ambiental.
+## 🎯 Visão Geral
 
-## Arquitetura (Monorepo)
+O Recicla Fácil na branch **main** é uma aplicação web completa que funciona diretamente no navegador, permitindo acesso de qualquer dispositivo (computador, tablet, smartphone) sem necessidade de instalação.
+
+### Arquitetura
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend       │    │   Database      │
-│   (AngularJS)   │◄──►│   (Laravel)     │◄──►│   (MySQL 8.0)  │
-│   Porta: 9160   │    │   Porta: 9161   │    │   Porta: 33061  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌──────────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ Frontend Web         │    │ Backend REST    │    │ Database        │
+│ AngularJS + HTML/CSS  │◄──►│ Laravel + PHP   │◄──►│ MySQL 8.0       │
+│ Navegador Web        │    │ Docker:9161     │    │ Docker:33061    │
+└──────────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-| Diretório | Propósito | Tecnologia |
-|-----------|-----------|------------|
-| `frontend/` | Interface do usuário SPA | AngularJS 1.8.3 + Nginx |
-| `backend/` | API REST e lógica de negócio | Laravel + PHP 8.2 |
-| `database/` | Migrações e seeders | MySQL 8.0 |
+## 🛠️ Stack Tecnológica
 
-## Stack & Principais Tecnologias
+### Frontend Web
+- **Framework:** AngularJS 1.x
+- **Linguagem:** JavaScript (ES5/ES6)
+- **Estilização:** CSS3, Bootstrap (ou framework CSS customizado)
+- **HTTP Client:** AngularJS $http service
+- **Build:** Gulp/Grunt ou Webpack (opcional)
+- **Execução:** Navegador web (Chrome, Firefox, Safari, Edge)
 
 ### Backend
 - **Linguagem:** PHP 8.2
 - **Framework:** Laravel (Illuminate Database)
 - **Banco de Dados:** MySQL 8.0
 - **Servidor:** Nginx + PHP-FPM
-- **Containerização:** Docker
-
-### Frontend
-- **Framework:** AngularJS 1.8.3
-- **Servidor:** Nginx Alpine
-- **Roteamento:** Angular Route
-- **HTTP Client:** Angular $http
-- **Containerização:** Docker
+- **Containerização:** Docker + Docker Compose
+- **API:** RESTful JSON
 
 ### Infraestrutura
 - **Orquestração:** Docker Compose
@@ -44,104 +42,236 @@ O Recicla Fácil é uma aplicação web que facilita o processo de reciclagem ao
 - **Banco de Dados:** MySQL 8.0
 - **Rede:** Bridge Network
 
-## Como Rodar (Local)
+## 📁 Estrutura do Projeto
 
-### Pré-requisitos
-- Docker e Docker Compose
-- Git
-
-### Instalação e Execução
-
-```bash
-# Clonar o repositório
-git clone <repository-url>
-cd recicla-facil
-
-# Build e inicialização dos containers
-docker compose build --no-cache
-docker compose up -d
-
-# Verificar status dos containers
-docker ps
+```
+recicla-facil/
+├── frontend/              # Aplicação AngularJS
+│   ├── app/
+│   │   ├── controllers/   # Controllers AngularJS
+│   │   ├── services/      # Services para comunicação com API
+│   │   ├── directives/    # Directives customizadas
+│   │   └── views/         # Templates HTML
+│   ├── assets/
+│   │   ├── css/           # Estilos CSS
+│   │   ├── js/            # JavaScript adicional
+│   │   └── images/        # Imagens e ícones
+│   ├── index.html         # Página principal
+│   └── package.json        # Dependências Node.js
+├── backend/                # API Laravel
+│   ├── app/
+│   ├── routes/
+│   ├── database/
+│   └── public/
+└── docker-compose.yml      # Configuração Docker
 ```
 
-### Acessos
-- **Frontend:** http://localhost:9160
-- **API Backend:** http://localhost:9160/api/*
-- **Database:** localhost:33061
+## 🚀 Como Executar
 
-## Configuração de Ambiente (resumo, sem nomes/valores)
+### Pré-requisitos
 
-O sistema utiliza variáveis de ambiente para configuração do banco de dados e aplicação. Crie um arquivo `.env` com credenciais locais e endpoints adequados ao seu ambiente. Evite commitar segredos.
+**Para Backend e Banco de Dados:**
+- ✅ Docker Desktop instalado e rodando
+- ✅ Docker Compose
 
-> TODO: Ajustar variáveis de ambiente conforme documentação interna.
+**Para Frontend:**
+- ✅ Navegador web moderno (Chrome, Firefox, Safari, Edge)
+- ✅ Node.js e npm (opcional, para build)
 
-## Docker
+### Passo a Passo
 
-### Comandos Principais
+#### 1. Iniciar Backend e Banco de Dados
 
 ```bash
-# Inicializar todos os serviços
+# Na raiz do projeto
 docker compose up -d
+```
 
-# Parar todos os serviços
-docker compose down
+#### 2. Verificar se Backend está Rodando
 
-# Rebuild completo
-docker compose build --no-cache
+```bash
+# Testar API
+curl http://localhost:9161/api/test
+
+# Ver logs
+docker compose logs -f backend
+```
+
+#### 3. Acessar Frontend Web
+
+**Opção 1: Servidor de Desenvolvimento (se configurado)**
+```bash
+cd frontend
+npm install
+npm start
+# Acessar: http://localhost:4200 ou porta configurada
+```
+
+**Opção 2: Servir Arquivos Estáticos**
+```bash
+# Usando Python
+cd frontend
+python -m http.server 8000
+# Acessar: http://localhost:8000
+
+# Ou usando Node.js http-server
+npx http-server -p 8000
+```
+
+**Opção 3: Integrado com Backend**
+- Se o frontend está servido pelo próprio backend Laravel, acesse:
+- `http://localhost:9161` (ou porta configurada)
+
+## 📍 Endpoints e Acessos
+
+| Serviço | URL | Descrição |
+|---------|-----|-----------|
+| **Frontend Web** | http://localhost:9161 | Interface web AngularJS |
+| **API Backend** | http://localhost:9161/api | API REST principal |
+| **Health Check** | http://localhost:9161/up | Verificar se backend está online |
+| **Database** | localhost:33061 | MySQL (acesso direto) |
+
+## 🎨 Características do Frontend AngularJS
+
+### Vantagens
+- ✅ **Acessibilidade:** Funciona em qualquer navegador moderno
+- ✅ **Responsivo:** Adapta-se a diferentes tamanhos de tela
+- ✅ **Sem Instalação:** Não requer instalação no dispositivo do usuário
+- ✅ **Atualização Automática:** Mudanças no servidor refletem imediatamente
+- ✅ **Multiplataforma:** Windows, Mac, Linux, Android, iOS
+
+### Funcionalidades
+- **SPA (Single Page Application):** Navegação fluida sem recarregar página
+- **Two-Way Data Binding:** Atualização automática da interface
+- **Roteamento:** Navegação entre diferentes views
+- **Serviços HTTP:** Comunicação assíncrona com API REST
+- **Filtros e Directives:** Manipulação de dados e criação de componentes reutilizáveis
+
+## 🔄 Fluxo de Dados
+
+```
+1. Usuário acessa http://localhost:9161 no navegador
+   ↓
+2. Navegador carrega index.html e AngularJS
+   ↓
+3. AngularJS inicializa e faz requisição: GET /api/auth/profile
+   ↓
+4. Backend valida token (se existir) e retorna dados do usuário
+   ↓
+5. AngularJS atualiza interface com dados recebidos
+   ↓
+6. Usuário interage (clica, preenche formulário)
+   ↓
+7. AngularJS envia requisição HTTP para API
+   ↓
+8. Backend processa e retorna JSON
+   ↓
+9. AngularJS atualiza view automaticamente
+```
+
+## 📋 Principais Funcionalidades
+
+### Para Usuários
+- ✅ **Autenticação:** Login e registro via interface web
+- ✅ **Dashboard:** Visualização de estatísticas e progresso
+- ✅ **Pontos de Coleta:** Mapa e lista de pontos próximos
+- ✅ **Cronograma:** Consulta de datas de coleta
+- ✅ **Pontuação:** Sistema gamificado com níveis e conquistas
+- ✅ **Recompensas:** Catálogo e resgate de benefícios
+- ✅ **Ranking:** Visualização de posição entre usuários
+- ✅ **Perfil:** Gerenciamento de dados pessoais
+
+### Para Administradores
+- ✅ **Painel Administrativo:** Interface de gestão
+- ✅ **Gestão de Coletas:** Aprovação e controle
+- ✅ **CRUD de Pontos:** Cadastro e manutenção
+- ✅ **Gestão de Recompensas:** Criação e edição
+- ✅ **Relatórios:** Métricas e estatísticas
+
+## 🔧 Desenvolvimento
+
+### Estrutura AngularJS Típica
+
+```javascript
+// app.js - Módulo principal
+var app = angular.module('reciclaFacil', ['ngRoute']);
+
+// Controller
+app.controller('DashboardController', function($scope, $http) {
+    $http.get('/api/pontuacao/estatisticas')
+        .then(function(response) {
+            $scope.estatisticas = response.data.data;
+        });
+});
+
+// Service
+app.service('PontuacaoService', function($http) {
+    this.getEstatisticas = function() {
+        return $http.get('/api/pontuacao/estatisticas');
+    };
+});
+```
+
+### Build e Deploy
+
+```bash
+# Instalar dependências
+cd frontend
+npm install
+
+# Build para produção (se configurado)
+npm run build
+
+# Os arquivos compilados podem ser servidos pelo backend
+# ou por qualquer servidor web estático
+```
+
+## 🐳 Docker
+
+```bash
+# Iniciar serviços
 docker compose up -d
 
 # Ver logs
-docker compose logs -f
+docker compose logs -f backend
 
-# Acessar container do backend
-docker exec -it recicla_facil_backend bash
-
-# Acessar container do frontend
-docker exec -it recicla_facil_frontend sh
+# Parar serviços
+docker compose down
 ```
 
-## Scripts Úteis
+## 📚 Tecnologias e Bibliotecas
 
-| Comando | Descrição |
-|---------|-----------|
-| `docker compose up -d` | Inicia todos os serviços em background |
-| `docker compose down` | Para e remove containers |
-| `docker compose build --no-cache` | Rebuild completo das imagens |
-| `docker compose logs -f` | Visualiza logs em tempo real |
-| `docker exec -it recicla_facil_backend bash` | Acessa terminal do backend |
-| `docker exec -it recicla_facil_frontend sh` | Acessa terminal do frontend |
+### Frontend
+- **AngularJS 1.x** - Framework JavaScript MVC
+- **Bootstrap** - Framework CSS (opcional)
+- **jQuery** - Biblioteca JavaScript (se necessário)
+- **Chart.js** - Gráficos e visualizações (opcional)
 
-## Funcionalidades Principais
+### Backend
+- **Laravel** - Framework PHP
+- **MySQL** - Banco de dados relacional
+- **Docker** - Containerização
 
-### Para Usuários
-- **Autenticação:** Registro e login de usuários
-- **Solicitação de Coleta:** Agendamento de coleta domiciliar
-- **Pontos de Coleta:** Visualização de pontos próximos no mapa
-- **Cronograma:** Consulta de datas de coleta
-- **Pontuação:** Sistema de pontos por ações sustentáveis
-- **Recompensas:** Resgate de benefícios com pontos
-- **Perfil:** Gerenciamento de dados pessoais
+## 🔍 Diferenças da Branch javafx-main
 
-### Para Administradores
-- **Gestão de Coletas:** Aprovação e controle de solicitações
-- **Pontos de Coleta:** Cadastro e manutenção de locais
-- **Cronograma:** Definição de datas de coleta
-- **Recompensas:** Criação e gestão de benefícios
-- **Relatórios:** Acompanhamento de métricas
+| Aspecto | Branch Main (Web) | Branch javafx-main (Desktop) |
+|---------|-------------------|------------------------------|
+| **Frontend** | AngularJS (Web) | JavaFX (Desktop) |
+| **Acesso** | Navegador web | Aplicativo instalado |
+| **Plataforma** | Multiplataforma (web) | Windows/Mac/Linux (nativo) |
+| **Instalação** | Não requer | Requer instalação |
+| **Atualização** | Automática (servidor) | Manual (nova versão) |
+| **Offline** | Não funciona | Pode funcionar parcialmente |
+| **Performance** | Depende do navegador | Nativa do sistema |
 
-## Estrutura do Banco de Dados
+## 📝 Notas
 
-O sistema inclui as seguintes entidades principais:
-- **Users:** Usuários do sistema
-- **Coletas:** Solicitações de coleta
-- **PontoColetas:** Pontos de coleta cadastrados
-- **CronogramaColetas:** Datas programadas de coleta
-- **Pontuacoes:** Histórico de pontos dos usuários
-- **Recompensas:** Benefícios disponíveis
-- **Conquistas:** Sistema de badges
-- **Doacoes:** Registro de doações
+- Esta branch utiliza AngularJS para criar uma experiência web completa
+- O frontend pode ser servido pelo próprio backend Laravel ou por um servidor web separado
+- Ideal para usuários que preferem acessar via navegador sem instalar software
+- Compatível com dispositivos móveis através de design responsivo
 
-## Créditos
+## 📄 Licença
 
-Sistema desenvolvido para promoção da sustentabilidade e gestão eficiente de resíduos recicláveis.
+> TODO: Definir licença do projeto.
+
