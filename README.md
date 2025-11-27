@@ -271,6 +271,35 @@ docker compose down
 - Ideal para usuários que preferem acessar via navegador sem instalar software
 - Compatível com dispositivos móveis através de design responsivo
 
+## 🗄️ Estrutura do Banco de Dados
+
+O sistema utiliza um banco de dados MySQL com **11 tabelas principais**:
+
+### Tabelas Principais
+
+1. **`users`** - Cadastro de usuários do sistema
+2. **`sessions`** - Controle de sessões e autenticação
+3. **`coletas`** - Solicitações de coleta domiciliar
+4. **`ponto_coletas`** - Pontos de coleta cadastrados
+5. **`cronograma_coletas`** - Cronograma de coletas programadas
+6. **`doacoes`** - Registro de doações de materiais
+7. **`pontuacoes`** - Sistema de pontuação e estatísticas dos usuários
+8. **`tipos_conquistas`** - Catálogo de conquistas disponíveis
+9. **`conquistas`** - Conquistas desbloqueadas pelos usuários
+10. **`recompensas`** - Catálogo de recompensas disponíveis
+11. **`resgate_recompensas`** - Histórico de resgates de recompensas
+
+### Funções das Tabelas
+
+- **Usuários e Autenticação:** `users`, `sessions`
+- **Coleta e Reciclagem:** `coletas`, `ponto_coletas`, `cronograma_coletas`, `doacoes`
+- **Gamificação:** `pontuacoes`, `tipos_conquistas`, `conquistas`
+- **Recompensas:** `recompensas`, `resgate_recompensas`
+
+Todas as tabelas são criadas automaticamente pelo script `init-database.php` quando o backend é iniciado pela primeira vez.
+
+---
+
 ## 📄 Licença
 
 > TODO: Definir licença do projeto.
