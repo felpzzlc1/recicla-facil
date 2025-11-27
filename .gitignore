@@ -1,0 +1,38 @@
+# Java / Maven
+javafx-client/target/
+javafx-client/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+*.jar
+!mvnw.jar
+
+# Scripts temporários
+javafx-client/executar.ps1
+javafx-client/setup-maven-wrapper.ps1
+javafx-client/execucao.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend
+backend/vendor/
+backend/.env
+backend/.env.docker
+backend/storage/logs/*.log
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+
+# Docker
+*.log
+

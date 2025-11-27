@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.reciclafacil.desktop.controller.CronogramaViewController"
+           styleClass="pontuacao-root">
+    <children>
+        <VBox fx:id="contentContainer" spacing="24" styleClass="page-container">
+            <padding>
+                <Insets top="32" right="32" bottom="32" left="32"/>
+            </padding>
+            <children>
+                <HBox spacing="24" alignment="CENTER_LEFT">
+                    <children>
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="📅 Cronograma de Coletas" styleClass="page-title"/>
+                                <Label text="Veja quando e onde acontecem as coletas na sua região" styleClass="page-subtitle"/>
+                            </children>
+                        </VBox>
+                        <ComboBox fx:id="filtroMaterial" promptText="Filtrar por material" prefWidth="200"/>
+                        <ComboBox fx:id="filtroDia" promptText="Filtrar por dia" prefWidth="200"/>
+                        <Button text="🔄 Atualizar" onAction="#atualizarLista" styleClass="primary-button"/>
+                    </children>
+                </HBox>
+
+                <VBox spacing="16" styleClass="card">
+                    <children>
+                        <Label text="Próximas Coletas" styleClass="card-title"/>
+                        <ListView fx:id="cronogramaListView" prefHeight="500"/>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+
+        <VBox fx:id="loadingState" alignment="CENTER" spacing="12" visible="false" styleClass="state-overlay">
+            <children>
+                <Label text="Carregando cronograma..." styleClass="state-title"/>
+            </children>
+        </VBox>
+
+        <VBox fx:id="errorState" alignment="CENTER" spacing="12" visible="false" styleClass="state-overlay">
+            <children>
+                <Label text="⚠️" styleClass="state-icon"/>
+                <Label fx:id="errorMessageLabel" wrapText="true" styleClass="state-title"/>
+                <Button text="Tentar novamente" onAction="#tentarNovamente"/>
+            </children>
+        </VBox>
+    </children>
+</StackPane>
+

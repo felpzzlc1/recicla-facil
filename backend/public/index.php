@@ -21,9 +21,27 @@ $dbname = 'recicla_facil';
 $username = 'root';
 $password = 'root';
 
+// Tentar conectar com retry (aguardar banco estar pronto)
+$pdo = null;
+$maxRetries = 10;
+$retryDelay = 2; // segundos
+
+for ($i = 0; $i < $maxRetries; $i++) {
+    try {
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        break; // Sucesso, sair do loop
+    } catch (PDOException $e) {
+        if ($i < $maxRetries - 1) {
+            sleep($retryDelay);
+            continue;
+        }
+        // Última tentativa falhou, lançar exceção
+        throw $e;
+    }
+}
+
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Criar tabelas se não existirem
     $pdo->exec("CREATE TABLE IF NOT EXISTS pontuacoes (
@@ -378,6 +396,12 @@ switch ($path) {
         if ($method === 'GET') {
             $stmt = $pdo->query("SELECT * FROM ponto_coletas WHERE ativo = 1 ORDER BY nome");
             $pontos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Decodificar materiais_aceitos de JSON string para array
+            foreach ($pontos as &$ponto) {
+                if (isset($ponto['materiais_aceitos']) && is_string($ponto['materiais_aceitos'])) {
+                    $ponto['materiais_aceitos'] = json_decode($ponto['materiais_aceitos'], true) ?? [];
+                }
+            }
             success($pontos);
         } elseif ($method === 'POST') {
             $input = json_decode(file_get_contents('php://input'), true);
@@ -437,7 +461,7 @@ switch ($path) {
             $pontosPorCidade = [];
             $pontosComDistancia = [];
             
-            foreach ($pontos as $ponto) {
+            foreach ($pontos as &$ponto) {
                 // Calcular distância apenas se o ponto tiver coordenadas
                 if ($ponto['latitude'] && $ponto['longitude']) {
                     $distancia = calcularDistancia($lat, $lng, $ponto['latitude'], $ponto['longitude']);
@@ -447,7 +471,11 @@ switch ($path) {
                     $ponto['distancia'] = 'Distância não disponível';
                     $ponto['distancia_km'] = 999999; // Valor alto para ordenar por último
                 }
-                $ponto['materiais'] = json_decode($ponto['materiais_aceitos'] ?? '[]', true);
+                // Decodificar materiais_aceitos de JSON string para array
+                if (isset($ponto['materiais_aceitos']) && is_string($ponto['materiais_aceitos'])) {
+                    $ponto['materiais_aceitos'] = json_decode($ponto['materiais_aceitos'], true) ?? [];
+                }
+                $ponto['materiais'] = $ponto['materiais_aceitos'] ?? [];
                 
                 // Extrair cidade do endereço (assumindo formato: "Rua, Bairro, Cidade - Estado")
                 $endereco = $ponto['endereco'];
@@ -476,15 +504,8 @@ switch ($path) {
                 return $a['distancia_km'] <=> $b['distancia_km'];
             });
             
-            success([
-                'pontos' => $pontosComDistancia,
-                'cidade' => $cidadeMaisProxima,
-                'localizacao' => [
-                    'latitude' => $lat,
-                    'longitude' => $lng
-                ],
-                'total' => count($pontosComDistancia)
-            ]);
+            // Retornar apenas a lista de pontos (não um objeto)
+            success($pontosComDistancia);
         }
         break;
         
@@ -503,7 +524,7 @@ switch ($path) {
             
             // Calcular distância para cada ponto
             $pontosComDistancia = [];
-            foreach ($pontos as $ponto) {
+            foreach ($pontos as &$ponto) {
                 // Calcular distância apenas se o ponto tiver coordenadas
                 if ($ponto['latitude'] && $ponto['longitude']) {
                     $distancia = calcularDistancia($lat, $lng, $ponto['latitude'], $ponto['longitude']);
@@ -513,7 +534,11 @@ switch ($path) {
                     $ponto['distancia'] = 'Distância não disponível';
                     $ponto['distancia_km'] = 999999; // Valor alto para ordenar por último
                 }
-                $ponto['materiais'] = json_decode($ponto['materiais_aceitos'] ?? '[]', true);
+                // Decodificar materiais_aceitos de JSON string para array
+                if (isset($ponto['materiais_aceitos']) && is_string($ponto['materiais_aceitos'])) {
+                    $ponto['materiais_aceitos'] = json_decode($ponto['materiais_aceitos'], true) ?? [];
+                }
+                $ponto['materiais'] = $ponto['materiais_aceitos'] ?? [];
                 $pontosComDistancia[] = $ponto;
             }
             
@@ -1046,6 +1071,29 @@ switch ($path) {
         }
         break;
         
+    case '/cronograma':
+        if ($method === 'GET') {
+            try {
+                $stmt = $pdo->query("SELECT * FROM cronograma_coletas WHERE ativo = 1 ORDER BY dia_semana, horario_inicio");
+                $cronogramas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                success($cronogramas);
+            } catch (PDOException $e) {
+                error('Erro ao buscar cronograma: ' . $e->getMessage(), 500);
+            }
+        }
+        break;
+        
+    case '/cronograma/proximos':
+        if ($method === 'GET') {
+            try {
+                $stmt = $pdo->query("SELECT * FROM cronograma_coletas WHERE ativo = 1 ORDER BY dia_semana, horario_inicio LIMIT 20");
+                $cronogramas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                success($cronogramas);
+            } catch (PDOException $e) {
+                error('Erro ao buscar cronograma: ' . $e->getMessage(), 500);
+            }
+        }
+        break;
         
     default:
         error('Rota não encontrada', 404);

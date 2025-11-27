@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.fxml.FXMLLoader?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.reciclafacil.desktop.controller.MainViewController"
+            styleClass="main-root">
+    <top>
+        <VBox styleClass="header">
+            <padding>
+                <Insets top="16" right="24" bottom="16" left="24"/>
+            </padding>
+            <children>
+                <Label text="🌱 Recicla Fácil" styleClass="app-title"/>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="main-tabs">
+            <tabs>
+                <Tab text="📊 Dashboard" fx:id="dashboardTab">
+                    <content>
+                        <StackPane fx:id="dashboardContainer"/>
+                    </content>
+                </Tab>
+                <Tab text="📍 Pontos de Coleta" fx:id="pontosTab">
+                    <content>
+                        <StackPane fx:id="pontosContainer"/>
+                    </content>
+                </Tab>
+                <Tab text="📅 Cronograma" fx:id="cronogramaTab">
+                    <content>
+                        <StackPane fx:id="cronogramaContainer"/>
+                    </content>
+                </Tab>
+                <Tab text="🎁 Recompensas" fx:id="recompensasTab">
+                    <content>
+                        <StackPane fx:id="recompensasContainer"/>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>
+

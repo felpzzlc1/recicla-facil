@@ -66,3 +66,110 @@
     -fx-font-size: 20px;
 }
 
+/* Main Navigation */
+.main-root {
+    -fx-background-color: linear-gradient(to bottom right, #f7f9fc, #edf1f7);
+}
+
+.header {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.08), 8, 0.2, 0, 4);
+}
+
+.app-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f2a44;
+}
+
+.main-tabs {
+    -fx-tab-min-width: 150px;
+    -fx-tab-min-height: 50px;
+}
+
+.main-tabs .tab {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+/* Ponto Coleta Cell */
+.ponto-coleta-cell {
+    -fx-background-color: rgba(15, 23, 42, 0.02);
+    -fx-background-radius: 12px;
+    -fx-spacing: 8;
+}
+
+.ponto-coleta-nome {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1f2a44;
+}
+
+.ponto-coleta-info {
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+}
+
+.ponto-coleta-distancia {
+    -fx-font-weight: 600;
+    -fx-text-fill: #0ea5e9;
+    -fx-font-size: 13px;
+}
+
+/* Cronograma Cell */
+.cronograma-cell {
+    -fx-background-color: rgba(15, 23, 42, 0.02);
+    -fx-background-radius: 12px;
+    -fx-spacing: 8;
+}
+
+.cronograma-material {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1f2a44;
+}
+
+.cronograma-horario {
+    -fx-font-weight: 600;
+    -fx-text-fill: #0ea5e9;
+    -fx-font-size: 14px;
+}
+
+.cronograma-info {
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+}
+
+/* Recompensa Cell */
+.recompensa-cell {
+    -fx-background-color: rgba(15, 23, 42, 0.02);
+    -fx-background-radius: 12px;
+    -fx-spacing: 8;
+}
+
+.recompensa-icon {
+    -fx-font-size: 32px;
+}
+
+.recompensa-titulo {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1f2a44;
+}
+
+.recompensa-descricao {
+    -fx-text-fill: #475569;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+}
+
+.recompensa-pontos {
+    -fx-font-weight: 600;
+    -fx-text-fill: #16a34a;
+    -fx-font-size: 14px;
+}
+
+.state-icon {
+    -fx-font-size: 48px;
+}
+

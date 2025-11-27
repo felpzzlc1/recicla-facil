@@ -18,9 +18,9 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) {
         try {
             Locale.setDefault(new Locale("pt", "BR"));
-            URL resource = getClass().getResource("/fxml/pontuacao-view.fxml");
+            URL resource = getClass().getResource("/fxml/main-view.fxml");
             if (resource == null) {
-                throw new IllegalStateException("FXML de pontuação não encontrado.");
+                throw new IllegalStateException("FXML principal não encontrado.");
             }
             Parent root = FXMLLoader.load(resource);
             Scene scene = new Scene(root, 1280, 720);
@@ -32,7 +32,7 @@ public class MainApp extends Application {
             if (pontuacaoCss != null) {
                 scene.getStylesheets().add(pontuacaoCss.toExternalForm());
             }
-            primaryStage.setTitle("Recicla Fácil - Dashboard de Pontuação");
+            primaryStage.setTitle("Recicla Fácil - Sistema de Reciclagem");
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {
